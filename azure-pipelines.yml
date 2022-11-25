@@ -30,7 +30,8 @@ steps:
     publishWebProjects: false
     projects: '**/BitcoinCash.API.csproj'
 
-- task: PublishPipelineArtifact@1
+- task: PublishBuildArtifacts@1
   inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)'
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
     ArtifactName: 'bch-api'
+    publishLocation: 'Container'
