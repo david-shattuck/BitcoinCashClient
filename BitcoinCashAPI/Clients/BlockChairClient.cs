@@ -1,22 +1,25 @@
-﻿using BitcoinCash.Models;
+﻿using BitcoinCash.API.Clients.Interfaces;
+using BitcoinCash.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace BitcoinCash
+namespace BitcoinCash.API.Clients
 {
-    public class BlockChairClient
+    public class BlockChairClient : IBlockChairClient
     {
         // https://blockchair.com/api/docs
-        private readonly string _key = "A___uan91DP96zb6dWLxX3gAWbqv8yIt";
+        private readonly string _key;
         private readonly string _baseUrl = "https://api.blockchair.com/bitcoin-cash";
 
-        public uint GetBalance(string address)
+        private readonly IConfiguration _configuration;
+
+        public BlockChairClient(IConfiguration configuration)
         {
-            var utxos = GetUtxos(new List<string> { address });
-            return (uint)utxos.Sum(u => u.value);
+            _configuration = configuration;
+            _key = _configuration["BlockchairAPIKey"];
         }
 
-        private List<utxo> GetUtxos(List<string> addresses)
+        public List<utxo> GetUtxos(List<string> addresses)
         {
             var client = new HttpClient();
 

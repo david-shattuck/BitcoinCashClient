@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BitcoinCashClient\BitcoinCashClient.csproj" />
+    <ProjectReference Include="..\BitcoinCashClient\BitcoinCash.Client.csproj" />
   </ItemGroup>
 
 </Project>

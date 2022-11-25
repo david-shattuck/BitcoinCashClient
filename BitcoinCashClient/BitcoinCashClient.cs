@@ -1,4 +1,5 @@
-﻿using BitcoinCash.Models;
+﻿using BitcoinCash.Client;
+using BitcoinCash.Models;
 using NBitcoin;
 using NBitcoin.Altcoins;
 
@@ -6,13 +7,13 @@ namespace BitcoinCash
 {
     public class BitcoinCashClient
     {
-        private readonly BlockChairClient _blockChairClient;
+        private readonly Network _network = BCash.Instance.Mainnet;
 
-        private readonly Network _network = BCash.Instance.Mainnet;        
+        private readonly ApiClient _apiClient;                
 
         public BitcoinCashClient()
         {
-            _blockChairClient = new BlockChairClient();
+            _apiClient = new ApiClient();
         }
 
         public Wallet GetWallet()
@@ -25,7 +26,7 @@ namespace BitcoinCash
             {
                 PrivateKey = secret.ToString(),
                 PublicAddress = address.ToString(),
-                Balance = 0
+                utxos = new List<utxo>()
             };
         }
 
@@ -34,12 +35,27 @@ namespace BitcoinCash
             var secret = new BitcoinSecret(privateKey, _network);
             var address = secret.GetAddress(ScriptPubKeyType.Legacy).ToString();
 
-            return new Wallet
+            var wallet = new Wallet
             {
                 PrivateKey = privateKey,
-                PublicAddress = address,
-                Balance = _blockChairClient.GetBalance(address)
+                PublicAddress = address
             };
+
+            return FillWalletInfo(new List<Wallet> { wallet } ).First();
+        }
+
+        private List<Wallet> FillWalletInfo(List<Wallet> wallets)
+        {
+            var addresses = wallets.Select(w => w.PublicAddress).ToList();
+
+            var filledWallets = _apiClient.GetWalletInfo(addresses);
+
+            return wallets.Select(w => new Wallet
+            {
+                PrivateKey = w.PrivateKey,
+                PublicAddress = w.PublicAddress,
+                utxos = filledWallets.FirstOrDefault(fw => fw.PublicAddress == w.PublicAddress)?.utxos
+            }).ToList();
         }
     }
 }
