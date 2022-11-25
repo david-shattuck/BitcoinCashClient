@@ -29,6 +29,7 @@ steps:
     command: 'publish'
     publishWebProjects: false
     projects: '**/BitcoinCash.API.csproj'
+    arguments: '--output $(Build.ArtifactStagingDirectory)'
 
 - task: PublishBuildArtifacts@1
   inputs:
