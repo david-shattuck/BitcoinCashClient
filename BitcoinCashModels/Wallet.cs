@@ -11,6 +11,14 @@
                 return utxos == null ? null : (uint)utxos.Sum(u => u.value);
             }
         }
+        public decimal? Value { get; set; }
+        public static string ValueCurrency 
+        { 
+            get 
+            {
+                return "usd";
+            } 
+        }
         public List<utxo>? utxos { get; set; }
     }
 }

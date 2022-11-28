@@ -7,9 +7,11 @@ namespace BitcoinCash.API.Services
     public class WalletService : IWalletService
     {
         private readonly IBlockChairClient _blockChairClient;
+        private readonly ICoinGeckoClient _coinGeckoClient;
 
-        public WalletService(IBlockChairClient blockChairClient)
+        public WalletService(ICoinGeckoClient coinGeckoClient, IBlockChairClient blockChairClient)
         {
+            _coinGeckoClient = coinGeckoClient;
             _blockChairClient = blockChairClient;
         }
 
@@ -19,7 +21,13 @@ namespace BitcoinCash.API.Services
 
             var utxos = _blockChairClient.GetUtxos(addresses);
 
-            wallets.ForEach(w => w.utxos = utxos.Where(u => u.cashAddr == w.PublicAddress).ToList());
+            var bchValue = _coinGeckoClient.GetValue();
+
+            wallets.ForEach(w =>
+            {
+                w.utxos = utxos.Where(u => u.cashAddr == w.PublicAddress).ToList();
+                w.Value = bchValue == 0 ? null : (decimal)w.Balance! / 100000000 * bchValue;
+            });
 
             return wallets;
         }

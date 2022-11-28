@@ -50,11 +50,15 @@ namespace BitcoinCash
 
             var filledWallets = _apiClient.GetWalletInfo(addresses);
 
-            return wallets.Select(w => new Wallet
+            return wallets.Select(w =>
             {
-                PrivateKey = w.PrivateKey,
-                PublicAddress = w.PublicAddress,
-                utxos = filledWallets.FirstOrDefault(fw => fw.PublicAddress == w.PublicAddress)?.utxos
+                var filledWallet = filledWallets.FirstOrDefault(fw => fw.PublicAddress == w.PublicAddress);
+                if (filledWallet == null)
+                    return w;
+
+                filledWallet.PrivateKey = w.PrivateKey;
+
+                return filledWallet;
             }).ToList();
         }
     }

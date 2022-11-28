@@ -5,7 +5,8 @@ namespace BitcoinCash.Client
 {
     public class ApiClient
     {
-        private readonly string _baseUrl = "https://localhost:7035";
+        private readonly string _baseUrl = "https://bch-api.com";
+        //private readonly string _baseUrl = "https://localhost:7035";
 
         public List<Wallet> GetWalletInfo(List<string> addresses)
         {
@@ -13,18 +14,11 @@ namespace BitcoinCash.Client
 
             var addrs = string.Join(",", addresses);
 
-            try
-            {
-                var response = client.GetAsync($"{_baseUrl}/wallet?addresses={addrs}").Result;
+            var response = client.GetAsync($"{_baseUrl}/wallet?addresses={addrs}").Result;
 
-                var result = response.Content.ReadAsStringAsync().Result;
+            var result = response.Content.ReadAsStringAsync().Result;
 
-                return JsonConvert.DeserializeObject<List<Wallet>>(result);
-            }
-            catch (Exception ex)
-            {
-                return new List<Wallet>();
-            }
+            return JsonConvert.DeserializeObject<List<Wallet>>(result)!;
         }
     }
 }
