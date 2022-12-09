@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="NBitcoin.Altcoins" Version="3.0.17" />
+  </ItemGroup>
+
 </Project>
