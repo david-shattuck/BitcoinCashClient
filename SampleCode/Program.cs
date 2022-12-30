@@ -1,4 +1,5 @@
 ﻿using BitcoinCash;
+using BitcoinCash.Models;
 using Newtonsoft.Json;
 
 var client = new BitcoinCashClient();
@@ -16,9 +17,16 @@ Display("sample wallet", wallet);
 
 
 // send 10% of wallet balance to sample address
-var sampleAddress = "bitcoincash:qpd5sv0st7v6svn59g0fdj82kze4f87wggjxxqznzu";
-wallet.Send(sampleAddress, (decimal)(wallet.Balance! * 0.1));
-Display("wallet after send", wallet);
+var sampleAddress = Constants.DevAddress;
+var sendAmount = (decimal)(wallet.Balance! * 0.1);
+wallet.Send(sampleAddress, sendAmount, Currency.Satoshis);
+Display("wallet after sat send", wallet);
+
+
+// send $0.10 to sample address
+sendAmount = (decimal)0.1;
+wallet.Send(sampleAddress, sendAmount, Currency.USDollars);
+Display("wallet after usd send", wallet);
 
 
 Console.ReadLine();

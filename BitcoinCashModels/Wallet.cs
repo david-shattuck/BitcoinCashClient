@@ -6,8 +6,8 @@ namespace BitcoinCash.Models
 {
     public class Wallet
     {
-        public string PrivateKey { get; set; }
-        public string PublicAddress { get; set; }
+        public string? PrivateKey { get; set; }
+        public string? PublicAddress { get; set; }
         public uint? Balance
         {
             get
@@ -25,10 +25,10 @@ namespace BitcoinCash.Models
         }
         public List<utxo>? utxos { get; set; }
 
-        public void Send(string sendTo, decimal sendAmount, bool donateToDev = false)
+        public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = false)
         {
             SetBaseFee();
-            SetSendSats(sendAmount);
+            SetSendSats(sendAmount, sendCurrency);
             SetDevDonation(donateToDev);
             SetAddresses(sendTo);
 
@@ -39,7 +39,7 @@ namespace BitcoinCash.Models
         {
             _sendAll = true;
             SetBaseFee();
-            SetSendSats(0);
+            SetSendSats(0, Currency.Satoshis);
             SetDevDonation(donateToDev);
             SetAddresses(sendTo);
 
@@ -72,7 +72,6 @@ namespace BitcoinCash.Models
         private Transaction? _transaction;
 
         private readonly Network _network = BCash.Instance.Mainnet;
-        private readonly string _devAddress = "bitcoincash:qr5v4l9gs6cy4avs8gyndgs8a03yu6nazyt4nngdqf";
 
         private decimal? _bchValue
         {
@@ -81,7 +80,7 @@ namespace BitcoinCash.Models
                 if (Balance == null || Value == null || Value == 0)
                     return null;
 
-                return Value / ((decimal)Balance / 100000000);
+                return Value / ((decimal)Balance / Constants.SatoshiMultiplier);
             }
         }
 
@@ -92,19 +91,25 @@ namespace BitcoinCash.Models
 
             var baseFeeInUSD = (decimal)0.001;
 
-            _baseFee = (uint)(baseFeeInUSD / _bchValue * 100000000);
+            _baseFee = (uint)(baseFeeInUSD / _bchValue * Constants.SatoshiMultiplier);
         }
 
-        private void SetSendSats(decimal sendAmount)
+        private void SetSendSats(decimal sendAmount, Currency sendCurrency)
         {
             if (_sendAll)
             {
                 VerifyUtxos();
                 _sendSats = (uint)utxos!.Sum(u => u.value);
                 return;
-            }                
+            }
 
-            _sendSats = (uint)sendAmount;
+            _sendSats = sendCurrency.Value switch
+            {
+                "bch" => (uint)(sendAmount * Constants.SatoshiMultiplier),
+                "sat" => (uint)sendAmount,
+                "usd" => (uint)(sendAmount / _bchValue! * Constants.SatoshiMultiplier),
+                _ => throw new Exception("Unrecognized currency code"),
+            };
         }
 
         private void SetDevDonation(bool donate)
@@ -188,7 +193,7 @@ namespace BitcoinCash.Models
 
         private void Outputs()
         {
-            var devAddress = BitcoinAddress.Create(_devAddress, _network);
+            var devAddress = BitcoinAddress.Create(Constants.DevAddress, _network);
 
             var utxoTotal = _utxos!.Sum(u => u.value);
 
@@ -272,7 +277,7 @@ namespace BitcoinCash.Models
                 _makeChange = false;
             }
 
-            Value = Balance * bchValue / 100000000;
+            Value = Balance * bchValue / Constants.SatoshiMultiplier;
         }
     }
 }
