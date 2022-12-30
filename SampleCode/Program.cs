@@ -29,6 +29,12 @@ wallet.Send(sampleAddress, sendAmount, Currency.USDollars);
 Display("wallet after usd send", wallet);
 
 
+// get read-only wallet by public address
+var samplePublicAddress = Constants.DevAddress;
+var readOnlyWallet = client.GetWalletByAddress(samplePublicAddress);
+Display("read-only wallet", readOnlyWallet);
+
+
 Console.ReadLine();
 
 

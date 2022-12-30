@@ -32,16 +32,41 @@ namespace BitcoinCash
 
         public Wallet GetWallet(string privateKey)
         {
-            var secret = new BitcoinSecret(privateKey, _network);
-            var address = secret.GetAddress(ScriptPubKeyType.Legacy).ToString();
+            return GetWallets(new List<string> { privateKey }).First();
+        }
 
-            var wallet = new Wallet
+        public List<Wallet> GetWallets(List<string> privateKeys)
+        {
+            var wallets = new List<Wallet>();
+
+            foreach (var key in privateKeys)
             {
-                PrivateKey = privateKey,
-                PublicAddress = address
-            };
+                var secret = new BitcoinSecret(key, _network);
+                var address = secret.GetAddress(ScriptPubKeyType.Legacy).ToString();
 
-            return FillWalletInfo(new List<Wallet> { wallet } ).First();
+                wallets.Add(new Wallet
+                {
+                    PrivateKey = key,
+                    PublicAddress = address
+                });
+            }
+
+            return FillWalletInfo(wallets);
+        }
+
+        public Wallet GetWalletByAddress(string address)
+        {
+            return GetWalletsByAddresses(new List<string> { address }).First();
+        }        
+
+        public List<Wallet> GetWalletsByAddresses(List<string> addresses)
+        {
+            var wallets = addresses.Select(a => new Wallet
+            {
+                PublicAddress = a
+            }).ToList();
+
+            return FillWalletInfo(wallets);
         }
 
         private List<Wallet> FillWalletInfo(List<Wallet> wallets)
