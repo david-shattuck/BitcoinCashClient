@@ -44,6 +44,6 @@ void Display(string name, object obj)
     Console.WriteLine();
     Console.WriteLine($"{name}:");
     Console.WriteLine();
-    Console.WriteLine(JsonConvert.SerializeObject(obj));
+    Console.WriteLine(JsonConvert.SerializeObject(obj, Formatting.Indented));
     Console.WriteLine();
 }

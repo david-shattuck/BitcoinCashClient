@@ -73,7 +73,7 @@ namespace BitcoinCash
         {
             var addresses = wallets.Select(w => w.PublicAddress).ToList();
 
-            var filledWallets = _apiClient.GetWalletInfo(addresses);
+            var filledWallets = _apiClient.GetWalletInfo(addresses!);
 
             return wallets.Select(w =>
             {
