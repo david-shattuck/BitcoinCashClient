@@ -1,18 +1,48 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageId>BitcoinCashClient</PackageId>
+    <Title>BitcoinCashClient</Title>
+    <Authors>david.shattuck</Authors>
+    <Company />
+    <Description>Simple, non-custodial (on-chain) Bitcoin Cash integration</Description>
+    <Product>BitcoinCashClient</Product>
+    <RepositoryUrl>https://github.com/david-shattuck/BitcoinCashClient</RepositoryUrl>
+    <PackageTags>Bitcoin, BitcoinCash, BCH, Cryptocurrency</PackageTags>
+    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NBitcoin" Version="7.0.19" />
-    <PackageReference Include="NBitcoin.Altcoins" Version="3.0.17" />
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BitcoinCashModels\BitcoinCash.Models.csproj" />
+    <PackageReference Include="NBitcoin" Version="7.0.24" />
+    <PackageReference Include="NBitcoin.Altcoins" Version="3.0.18" />
+    <PackageReference Include="Teronis.MSBuild.Packaging.ProjectBuildInPackage" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BitcoinCashModels\BitcoinCash.Models.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
