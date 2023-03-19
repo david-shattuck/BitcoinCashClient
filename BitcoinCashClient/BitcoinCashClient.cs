@@ -16,11 +16,6 @@ namespace BitcoinCash
             _apiClient = new ApiClient();
         }
 
-        public void DoesNothingTest()
-        {
-            //this does nothing
-        }
-
         public Wallet GetWallet()
         {
             var rawKey = new Key();
