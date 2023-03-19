@@ -36,7 +36,7 @@ namespace BitcoinCash.API.Clients
 
                 return JsonConvert.DeserializeObject<List<utxo>>(utxos);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new List<utxo>();
             }
