@@ -1,0 +1,30 @@
+
+trigger:
+- main
+
+pool:
+  vmImage: windows-latest
+
+variables:
+  majorMinorVersion: 1.0
+  semanticVersion: $[counter(variables['majorMinorVersion'], 0)]
+  buildConfiguration: 'Release'
+
+name: $(majorMinorVersion).$(semanticVersion)
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '6.x'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/BitcoinCash.Client.csproj'
+    versioningScheme: 'byBuildNumber'
+
+- task: NuGetCommand@2
+  inputs:
+    command: push
+    nuGetFeedType: external
+    publishFeedCredentials: Nuget
