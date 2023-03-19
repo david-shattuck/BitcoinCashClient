@@ -19,7 +19,9 @@ namespace BitcoinCash.API.Clients
 
             var json = response.Content.ReadAsStringAsync().Result;
 
-            dynamic data = JsonConvert.DeserializeObject(json);
+            dynamic? data = JsonConvert.DeserializeObject(json);
+
+            if (data == null) return 0;
 
             return data["bitcoin-cash"][currency];
         }

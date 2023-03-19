@@ -32,9 +32,9 @@ namespace BitcoinCash.API.Clients
 
                 var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
-                var utxos = jo["data"]["utxo"].ToString();
+                var utxos = jo?["data"]?["utxo"]?.ToString();
 
-                return JsonConvert.DeserializeObject<List<utxo>>(utxos);
+                return JsonConvert.DeserializeObject<List<utxo>>(utxos!) ?? new List<utxo>();
             }
             catch (Exception)
             {
