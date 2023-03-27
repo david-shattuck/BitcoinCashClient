@@ -13,7 +13,7 @@
     <Product>BitcoinCashClient</Product>
     <RepositoryUrl>https://github.com/david-shattuck/BitcoinCashClient</RepositoryUrl>
     <PackageTags>Bitcoin, BitcoinCash, BCH, Cryptocurrency</PackageTags>
-    <PackageReleaseNotes>Initial release</PackageReleaseNotes>
+    <PackageReleaseNotes>See ReadMe</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>

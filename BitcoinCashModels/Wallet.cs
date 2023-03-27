@@ -25,6 +25,13 @@ namespace BitcoinCash.Models
         }
         public List<utxo>? utxos { get; set; }
 
+        /// <summary>
+        /// Send the specified amount to the specified address
+        /// </summary>
+        /// <param name="sendTo">A valid BCH address - the recipient of this send</param>
+        /// <param name="sendAmount">The amount to send </param>
+        /// <param name="sendCurrency">The currency units of the send amount</param>
+        /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
         public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = false)
         {
             SetBaseFee();
@@ -35,6 +42,11 @@ namespace BitcoinCash.Models
             BaseSend();
         }
 
+        /// <summary>
+        /// Send the entire wallet balance to the specified address
+        /// </summary>
+        /// <param name="sendTo">A valid BCH address - the recipient of this send</param>
+        /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
         public void SendAll(string sendTo, bool donateToDev = false)
         {
             _sendAll = true;

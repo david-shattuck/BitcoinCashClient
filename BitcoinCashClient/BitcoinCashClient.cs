@@ -16,6 +16,10 @@ namespace BitcoinCash
             _apiClient = new ApiClient();
         }
 
+        /// <summary>
+        /// Generate a new private key and its associated public address
+        /// </summary>
+        /// <returns>A new empty wallet</returns>
         public Wallet GetWallet()
         {
             var rawKey = new Key();
@@ -30,11 +34,21 @@ namespace BitcoinCash
             };
         }
 
+        /// <summary>
+        /// Get the wallet associated with the given private key
+        /// </summary>
+        /// <param name="privateKey">Any valid BCH wallet private key</param>
+        /// <returns>A live wallet, including its public address, sendable balance, value, and utxos</returns>
         public Wallet GetWallet(string privateKey)
         {
             return GetWallets(new List<string> { privateKey }).First();
         }
 
+        /// <summary>
+        /// Get the list of wallets associated with the given private keys
+        /// </summary>
+        /// <param name="privateKeys">A list of valid BCH wallet private keys</param>
+        /// <returns>A list of live wallets, including their public addresses, sendable balances, values, and utxos</returns>
         public List<Wallet> GetWallets(List<string> privateKeys)
         {
             var wallets = new List<Wallet>();
@@ -54,11 +68,21 @@ namespace BitcoinCash
             return FillWalletInfo(wallets);
         }
 
+        /// <summary>
+        /// Get the wallet associated with the given public address
+        /// </summary>
+        /// <param name="address">Any valid BCH public address</param>
+        /// <returns>A read-only wallet, including its balance, value, and utxos</returns>
         public Wallet GetWalletByAddress(string address)
         {
             return GetWalletsByAddresses(new List<string> { address }).First();
         }        
 
+        /// <summary>
+        /// Get the wallets associated with the given public addresses
+        /// </summary>
+        /// <param name="addresses">A list of valid BCH public addresses</param>
+        /// <returns>A list of read-only wallets, including their balances, values, and utxos</returns>
         public List<Wallet> GetWalletsByAddresses(List<string> addresses)
         {
             var wallets = addresses.Select(a => new Wallet
