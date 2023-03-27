@@ -80,7 +80,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
-##### 1.0
+#### 1.0
 
 - Create wallet
 - Get live wallet by private key
