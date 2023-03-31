@@ -12,7 +12,7 @@ Private keys are never exposed. [Don't trust. Verify.](https://github.com/david-
 ## How to Use
 
 
-#### Instantiate
+### Instantiate
 
 ```csharp
 using BitcoinCash;
@@ -21,7 +21,7 @@ var client = new BitcoinCashClient();
 ```
 
 
-#### Create new wallet
+### Create new wallet
 
 Generate a new Bitcoin Cash private key and its associated public address.
 
@@ -30,7 +30,7 @@ var wallet = client.GetWallet();
 ```
 
 
-#### Get existing live wallet
+### Get existing live wallet
 
 Use a private key to get a live wallet. This operation retrieves all utxos, calculates the wallet balance (and fiat value), and enables sending funds.
 
@@ -42,7 +42,7 @@ var wallet = client.GetWallet(privateKey);
 *Note: Again, the private key is never exposed. The key is used to compute the public address, which is then used to fetch the wallet info from a block explorer.*
 
 
-#### Send 
+### Send 
 
 Send the specified amount of Bitcoin Cash to the specified address.
 
@@ -52,7 +52,7 @@ wallet.Send("<destination-address>", 1m, Currency.USDollars);
 ```
 
 
-#### Send All
+### Send All
 
 Send the entire wallet balance to the specified address.
 
@@ -61,7 +61,7 @@ wallet.SendAll("<destinarion-address>");
 ```
 
 
-#### Get existing read-only wallet
+### Get existing read-only wallet
 
 Use a public address to get a read-only wallet. 
 
@@ -80,7 +80,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
-#### 1.0
+### 1.0
 
 - Create wallet
 - Get live wallet by private key

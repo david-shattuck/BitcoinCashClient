@@ -6,7 +6,7 @@
         public string? address { get; set; }
         public string? transaction_hash { get; set; }
         public uint index { get; set; }
-        public uint value { get; set; }
+        public long value { get; set; }
         public string cashAddr
         {
             get

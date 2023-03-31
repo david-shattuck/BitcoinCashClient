@@ -8,13 +8,7 @@ namespace BitcoinCash.Models
     {
         public string? PrivateKey { get; set; }
         public string? PublicAddress { get; set; }
-        public uint? Balance
-        {
-            get
-            {
-                return utxos == null ? null : (uint)utxos.Sum(u => u.value);
-            }
-        }
+        public long? Balance => utxos?.Sum(u => u.value);
         public decimal? Value { get; set; }
         public static string ValueCurrency 
         { 
@@ -34,6 +28,7 @@ namespace BitcoinCash.Models
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
         public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = false)
         {
+            VerifyUtxos();
             SetBaseFee();
             SetSendSats(sendAmount, sendCurrency);
             SetDevDonation(donateToDev);
@@ -50,6 +45,7 @@ namespace BitcoinCash.Models
         public void SendAll(string sendTo, bool donateToDev = false)
         {
             _sendAll = true;
+            VerifyUtxos();
             SetBaseFee();
             SetSendSats(0, Currency.Satoshis);
             SetDevDonation(donateToDev);
@@ -70,10 +66,10 @@ namespace BitcoinCash.Models
             Cleanup();
         }
 
-        private uint _baseFee;
-        private uint _totalFee;
-        private uint _sendSats;
-        private uint _devDonation;
+        private long _baseFee;
+        private long _totalFee;
+        private long _sendSats;
+        private long _devDonation;
         private bool _donateToDev;
         private bool _sendAll = false;
         private bool _makeChange = false;
@@ -103,30 +99,29 @@ namespace BitcoinCash.Models
 
             var baseFeeInUSD = (decimal)0.001;
 
-            _baseFee = (uint)(baseFeeInUSD / _bchValue * Constants.SatoshiMultiplier);
+            _baseFee = (long)(baseFeeInUSD / _bchValue * Constants.SatoshiMultiplier);
         }
 
         private void SetSendSats(decimal sendAmount, Currency sendCurrency)
         {
             if (_sendAll)
             {
-                VerifyUtxos();
-                _sendSats = (uint)utxos!.Sum(u => u.value);
+                _sendSats = utxos!.Sum(u => u.value);
                 return;
             }
 
             _sendSats = sendCurrency.Value switch
             {
-                "bch" => (uint)(sendAmount * Constants.SatoshiMultiplier),
-                "sat" => (uint)sendAmount,
-                "usd" => (uint)(sendAmount / _bchValue! * Constants.SatoshiMultiplier),
+                "bch" => (long)(sendAmount * Constants.SatoshiMultiplier),
+                "sat" => (long)sendAmount,
+                "usd" => (long)(sendAmount / _bchValue! * Constants.SatoshiMultiplier),
                 _ => throw new Exception("Unrecognized currency code"),
             };
         }
 
         private void SetDevDonation(bool donate)
         {
-            _devDonation = (uint)(donate ? _sendSats * 0.001 : 0);
+            _devDonation = (long)(donate ? _sendSats * 0.001 : 0);
             if (_devDonation < _baseFee * 10)
                 _devDonation = 0;
 
@@ -148,8 +143,6 @@ namespace BitcoinCash.Models
 
         private void SetSendUtxos()
         {
-            VerifyUtxos();
-
             if (_sendAll)
             {
                 _utxos = utxos;
@@ -179,7 +172,7 @@ namespace BitcoinCash.Models
         private void SetTotalFee()
         {
             var ioCount = _utxos!.Count + (_donateToDev ? 1 : 0) + 1;
-            _totalFee = (uint)(_baseFee * ioCount);
+            _totalFee = _baseFee * ioCount;
 
             if (_sendAll)
                 _sendSats -= _totalFee;
@@ -252,13 +245,13 @@ namespace BitcoinCash.Models
 
             node.SendMessage(new TxPayload(_transaction));
 
-            Thread.Sleep(5000);
+            Thread.Sleep(500);
         }
 
         private void VerifyUtxos()
         {
             if (utxos == null || utxos.Count == 0)
-                throw new Exception("There are no utxos to send");
+                throw new Exception("There are no utxos to spend");
         }
 
         private void Cleanup()
@@ -283,7 +276,7 @@ namespace BitcoinCash.Models
                     block_id = 10000000,
                     transaction_hash = _transaction!.GetHash().ToString(),
                     index = 1,
-                    value = (uint)_utxos!.Sum(u => u.value) - _sendSats - _devDonation - _totalFee
+                    value = _utxos!.Sum(u => u.value) - _sendSats - _devDonation - _totalFee
                 });
 
                 _makeChange = false;
