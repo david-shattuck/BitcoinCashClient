@@ -6,6 +6,7 @@ using BitcoinCash.API.Clients;
 var builder = WebApplication.CreateBuilder(args);
 
 // services
+builder.Services.AddTransient<IFiatService, FiatService>();
 builder.Services.AddTransient<IWalletService, WalletService>();
 
 // clients

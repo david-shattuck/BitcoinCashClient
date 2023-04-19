@@ -24,7 +24,7 @@ Display("wallet after sat send", wallet);
 
 
 // send $0.10 to sample address
-sendAmount = (decimal)0.1;
+sendAmount = 0.1m;
 wallet.Send(sampleAddress, sendAmount, Currency.USDollars);
 Display("wallet after usd send", wallet);
 
@@ -33,6 +33,11 @@ Display("wallet after usd send", wallet);
 var samplePublicAddress = Constants.DevAddress;
 var readOnlyWallet = client.GetWalletByAddress(samplePublicAddress);
 Display("read-only wallet", readOnlyWallet);
+
+
+// get current market value of BCH in default currency (USD)
+var usdValue = client.GetFiatValue();
+Display("USD value", usdValue);
 
 
 Console.ReadLine();

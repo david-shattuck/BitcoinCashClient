@@ -10,15 +10,29 @@ namespace BitcoinCash.Client
 
         public List<Wallet> GetWalletInfo(List<string> addresses)
         {
-            var client = new HttpClient();
-
             var addrs = string.Join(",", addresses);
 
-            var response = client.GetAsync($"{_baseUrl}/wallet?addresses={addrs}").Result;
+            var url = $"{_baseUrl}/wallet?addresses={addrs}";
+
+            return GetFromApi<List<Wallet>>(url);
+        }
+
+        public decimal GetFiatValue(string currency)
+        {
+            var url = $"{_baseUrl}/fiat/getvalue?currency={currency}";
+
+            return GetFromApi<decimal>(url);
+        }
+
+        private static T GetFromApi<T>(string url)
+        {
+            var client = new HttpClient();
+
+            var response = client.GetAsync(url).Result;
 
             var result = response.Content.ReadAsStringAsync().Result;
 
-            return JsonConvert.DeserializeObject<List<Wallet>>(result)!;
+            return JsonConvert.DeserializeObject<T>(result)!;
         }
     }
 }

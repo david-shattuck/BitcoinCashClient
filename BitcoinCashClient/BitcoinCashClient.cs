@@ -9,11 +9,19 @@ namespace BitcoinCash
     {
         private readonly Network _network = BCash.Instance.Mainnet;
 
-        private readonly ApiClient _apiClient;                
+        private readonly ApiClient _apiClient;
+        private string _defaultCurrency;
 
         public BitcoinCashClient()
         {
             _apiClient = new ApiClient();
+            SetOptions();
+        }
+
+        public BitcoinCashClient(ClientOptions options)
+        {
+            _apiClient = new ApiClient();
+            SetOptions(options);
         }
 
         /// <summary>
@@ -93,6 +101,35 @@ namespace BitcoinCash
             return FillWalletInfo(wallets);
         }
 
+        /// <summary>
+        /// Get the current market value of BCH in the default fiat currency
+        /// </summary>
+        /// <returns>The current fiat value of BCH</returns>
+        public decimal GetFiatValue()
+        {
+            var fiatValue = _apiClient.GetFiatValue(_defaultCurrency);
+
+            ValidateFiatValue(fiatValue);
+
+            return fiatValue;
+        } 
+
+        /// <summary>
+        /// Get the current market value of BCH in the specified fiat currency
+        /// </summary>
+        /// <param name="currency">A Currency object from BitcoinCash.Models.Currency</param>
+        /// <returns>The current fiat value of BCH</returns>
+        public decimal GetFiatValue(Currency currency)
+        {
+            ValidateFiat(currency);
+
+            var fiatValue = _apiClient.GetFiatValue(currency.Value);
+
+            ValidateFiatValue(fiatValue);
+
+            return fiatValue;
+        }
+
         private List<Wallet> FillWalletInfo(List<Wallet> wallets)
         {
             var addresses = wallets.Select(w => w.PublicAddress).ToList();
@@ -109,6 +146,36 @@ namespace BitcoinCash
 
                 return filledWallet;
             }).ToList();
+        }
+
+        private static void ValidateFiat(Currency currency)
+        {
+            if (currency.Value == Currency.BitcoinCash.Value ||
+                currency.Value == Currency.Satoshis.Value)
+                throw new Exception("BCH cannot be used for fiat value pair");
+        }
+
+        private static void ValidateFiatValue(decimal value)
+        {
+            if (value == 0)
+                throw new Exception("Something went wrong while fetching fiat value of BCH");
+        }
+
+        private void SetOptions()
+        {
+            var options = new ClientOptions
+            {
+                Currency = Currency.USDollars
+            };
+
+            SetOptions(options);
+        }
+
+        private void SetOptions(ClientOptions options)
+        {
+            ValidateFiat(options.Currency);
+
+            _defaultCurrency = options.Currency.Value;
         }
     }
 }

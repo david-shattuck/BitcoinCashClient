@@ -57,7 +57,7 @@ wallet.Send("<destination-address>", 1m, Currency.USDollars);
 Send the entire wallet balance to the specified address.
 
 ```csharp
-wallet.SendAll("<destinarion-address>");
+wallet.SendAll("<destination-address>");
 ```
 
 
@@ -79,6 +79,10 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 
 ## Version History
+
+### 1.1
+
+- Get fiat value
 
 ### 1.0
 
