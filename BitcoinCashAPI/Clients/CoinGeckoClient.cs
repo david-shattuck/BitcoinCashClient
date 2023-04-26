@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using BitcoinCash.API.Clients.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BitcoinCash.API.Clients
 {
@@ -8,8 +9,18 @@ namespace BitcoinCash.API.Clients
         // https://www.coingecko.com/en/api/documentation
         private readonly string _baseUrl = "https://api.coingecko.com/api/v3";
 
+        private readonly IMemoryCache _cache;
+
+        public CoinGeckoClient(IMemoryCache cache)
+        {
+            _cache = cache;
+        }
+
         public decimal GetValue(string currency = "usd")
         {
+            if(_cache.TryGetValue(currency, out decimal value))
+                return value;
+
             var client = new HttpClient();
 
             var response = client.GetAsync($"{_baseUrl}/simple/price?ids=bitcoin-cash&vs_currencies={currency}").Result;
@@ -23,7 +34,21 @@ namespace BitcoinCash.API.Clients
 
             if (data == null) return 0;
 
-            return data["bitcoin-cash"][currency];
+            value = data["bitcoin-cash"][currency];
+
+            SaveToCache(currency, value);
+
+            return value;
+        }
+
+        private void SaveToCache(string currency, decimal value) 
+        {
+            var options = new MemoryCacheEntryOptions
+            {
+                AbsoluteExpiration = DateTime.UtcNow.AddMinutes(2)
+            };
+
+            _cache.Set(currency, value, options);
         }
     }
 }
