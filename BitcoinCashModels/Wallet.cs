@@ -1,6 +1,7 @@
 ﻿using NBitcoin;
 using NBitcoin.Altcoins;
 using NBitcoin.Protocol;
+using Newtonsoft.Json;
 
 namespace BitcoinCash.Models
 {
@@ -10,13 +11,7 @@ namespace BitcoinCash.Models
         public string? PublicAddress { get; set; }
         public long? Balance => utxos?.Sum(u => u.value);
         public decimal? Value { get; set; }
-        public static string ValueCurrency 
-        { 
-            get 
-            {
-                return "usd";
-            } 
-        }
+        public string? ValueCurrency { get; set; }
         public List<utxo>? utxos { get; set; }
 
         /// <summary>
@@ -47,7 +42,7 @@ namespace BitcoinCash.Models
             _sendAll = true;
             VerifyUtxos();
             SetBaseFee();
-            SetSendSats(0, Currency.Satoshis);
+            SetSendSats();
             SetDevDonation(donateToDev);
             SetAddresses(sendTo);
 
@@ -99,24 +94,25 @@ namespace BitcoinCash.Models
 
             var baseFeeInUSD = (decimal)0.001;
 
-            _baseFee = (long)(baseFeeInUSD / _bchValue * Constants.SatoshiMultiplier);
+            var bchValueInUSD = GetFiatValue(Currency.USDollar);
+
+            _baseFee = (long)(baseFeeInUSD / bchValueInUSD * Constants.SatoshiMultiplier);
         }
+
+        private void SetSendSats() => _sendSats = utxos!.Sum(u => u.value);
 
         private void SetSendSats(decimal sendAmount, Currency sendCurrency)
         {
-            if (_sendAll)
-            {
-                _sendSats = utxos!.Sum(u => u.value);
-                return;
-            }
+            if (sendCurrency == Currency.BitcoinCash)
+                _sendSats = (long)(sendAmount * Constants.SatoshiMultiplier);
 
-            _sendSats = sendCurrency.Value switch
-            {
-                "bch" => (long)(sendAmount * Constants.SatoshiMultiplier),
-                "sat" => (long)sendAmount,
-                "usd" => (long)(sendAmount / _bchValue! * Constants.SatoshiMultiplier),
-                _ => throw new Exception("Unrecognized currency code"),
-            };
+            if (sendCurrency == Currency.Satoshis)
+                _sendSats = (long)sendAmount;
+
+            if (sendCurrency.Value == ValueCurrency)
+                _sendSats = (long)(sendAmount / _bchValue! * Constants.SatoshiMultiplier);
+            else
+                _sendSats = (long)(sendAmount / GetFiatValue(sendCurrency) * Constants.SatoshiMultiplier);
         }
 
         private void SetDevDonation(bool donate)
@@ -252,6 +248,24 @@ namespace BitcoinCash.Models
         {
             if (utxos == null || utxos.Count == 0)
                 throw new Exception("There are no utxos to spend");
+        }
+
+        private decimal GetFiatValue(Currency currency)
+        {
+            if (ValueCurrency == currency.Value)
+                return (decimal)_bchValue!;
+
+            var baseUrl = Constants.ApiUrl;
+
+            var url = $"{baseUrl}/fiat/getvalue?currency={currency.Value}";
+
+            var client = new HttpClient();
+
+            var response = client.GetAsync(url).Result;
+
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            return JsonConvert.DeserializeObject<decimal>(result)!;
         }
 
         private void Cleanup()

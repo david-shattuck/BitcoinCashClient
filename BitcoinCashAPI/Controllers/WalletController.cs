@@ -16,11 +16,11 @@ namespace BitcoinCash.API.Controllers
         }
 
         [HttpGet]
-        public List<Wallet> Get([FromQuery] string addresses)
+        public List<Wallet> Get(string addresses, string currency)
         {
             var addressList = addresses.Split(',').ToList();
 
-            return _walletService.GetWalletInfo(addressList);
+            return _walletService.GetWalletInfo(addressList, currency);
         }
     }
 }

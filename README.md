@@ -80,6 +80,10 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
+### 1.2
+
+- Support for many fiat currencies
+
 ### 1.1
 
 - Get fiat value

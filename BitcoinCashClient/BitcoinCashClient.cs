@@ -38,7 +38,9 @@ namespace BitcoinCash
             {
                 PrivateKey = secret.ToString(),
                 PublicAddress = address.ToString(),
-                utxos = new List<utxo>()
+                utxos = new List<utxo>(),
+                Value = 0,
+                ValueCurrency = _defaultCurrency
             };
         }
 
@@ -134,7 +136,7 @@ namespace BitcoinCash
         {
             var addresses = wallets.Select(w => w.PublicAddress).ToList();
 
-            var filledWallets = _apiClient.GetWalletInfo(addresses!);
+            var filledWallets = _apiClient.GetWalletInfo(addresses!, _defaultCurrency);
 
             return wallets.Select(w =>
             {
@@ -165,7 +167,7 @@ namespace BitcoinCash
         {
             var options = new ClientOptions
             {
-                Currency = Currency.USDollars
+                Currency = Currency.USDollar
             };
 
             SetOptions(options);

@@ -5,21 +5,18 @@ namespace BitcoinCash.Client
 {
     public class ApiClient
     {
-        private readonly string _baseUrl = "https://bch-api.com";
-        //private readonly string _baseUrl = "https://localhost:7035";
-
-        public List<Wallet> GetWalletInfo(List<string> addresses)
+        public List<Wallet> GetWalletInfo(List<string> addresses, string currency)
         {
             var addrs = string.Join(",", addresses);
 
-            var url = $"{_baseUrl}/wallet?addresses={addrs}";
+            var url = $"{Constants.ApiUrl}/wallet?addresses={addrs}&currency={currency}";
 
             return GetFromApi<List<Wallet>>(url);
         }
 
         public decimal GetFiatValue(string currency)
         {
-            var url = $"{_baseUrl}/fiat/getvalue?currency={currency}";
+            var url = $"{Constants.ApiUrl}/fiat/getvalue?currency={currency}";
 
             return GetFromApi<decimal>(url);
         }

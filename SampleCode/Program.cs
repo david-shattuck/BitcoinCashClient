@@ -25,7 +25,7 @@ Display("wallet after sat send", wallet);
 
 // send $0.10 to sample address
 sendAmount = 0.1m;
-wallet.Send(sampleAddress, sendAmount, Currency.USDollars);
+wallet.Send(sampleAddress, sendAmount, Currency.USDollar);
 Display("wallet after usd send", wallet);
 
 
@@ -38,6 +38,36 @@ Display("read-only wallet", readOnlyWallet);
 // get current market value of BCH in default currency (USD)
 var usdValue = client.GetFiatValue();
 Display("USD value", usdValue);
+
+//// get current market value of BCH in other currencies
+//var euroValue = client.GetFiatValue(Currency.Euro);
+//Display("Euro value", euroValue);
+
+//var yuanValue = client.GetFiatValue(Currency.ChineseYuan);
+//Display("Yuan value", yuanValue);
+
+//var pesoValue = client.GetFiatValue(Currency.MexicanPeso);
+//Display("Peso value", pesoValue);
+
+//// use a different base fiat currency
+//var clientOptions = new ClientOptions
+//{
+//    Currency = Currency.SouthAfricanRand
+//};
+
+//client = new BitcoinCashClient(clientOptions);
+
+//// wallet inherits currency of client
+//wallet = client.GetWallet(privateKey);
+//Display("South African Rand wallet", wallet);
+
+//// send using base fiat currency
+//wallet.Send(Constants.DevAddress, 3m, Currency.SouthAfricanRand);
+//Display("South African Rand wallet after ZAR send", wallet);
+
+//// send using non-base fiat currency
+//wallet.Send(Constants.DevAddress, 0.1m, Currency.Euro);
+//Display("South African Rand wallet after Euro send", wallet);
 
 
 Console.ReadLine();
