@@ -2,6 +2,7 @@
 using NBitcoin.Altcoins;
 using NBitcoin.Protocol;
 using Newtonsoft.Json;
+using SharpCashAddr;
 
 namespace BitcoinCash.Models
 {
@@ -134,7 +135,7 @@ namespace BitcoinCash.Models
 
             _secret = new BitcoinSecret(PrivateKey, _network);
             _address = _secret.GetAddress(ScriptPubKeyType.Legacy);
-            _toAddress = BitcoinAddress.Create(sendTo, _network);
+            _toAddress = BitcoinAddress.Create(GetCashAddr(sendTo), _network);
         }
 
         private void SetSendUtxos()
@@ -248,6 +249,17 @@ namespace BitcoinCash.Models
         {
             if (utxos == null || utxos.Count == 0)
                 throw new Exception("There are no utxos to spend");
+        }
+
+        private string GetCashAddr(string address)
+        {
+            if (address.StartsWith("bitcoincash:"))
+                return address;
+
+            if (address.StartsWith("1") || address.StartsWith("3"))
+                return address.ToCashAddress();
+
+            return string.Concat("bitcoincash:", address);
         }
 
         private decimal GetFiatValue(Currency currency)

@@ -2,6 +2,7 @@
 using BitcoinCash.Models;
 using NBitcoin;
 using NBitcoin.Altcoins;
+using SharpCashAddr;
 
 namespace BitcoinCash
 {
@@ -97,7 +98,7 @@ namespace BitcoinCash
         {
             var wallets = addresses.Select(a => new Wallet
             {
-                PublicAddress = a
+                PublicAddress = GetCashAddr(a)
             }).ToList();
 
             return FillWalletInfo(wallets);
@@ -161,6 +162,17 @@ namespace BitcoinCash
         {
             if (value == 0)
                 throw new Exception("Something went wrong while fetching fiat value of BCH");
+        }
+
+        private string GetCashAddr(string address)
+        {
+            if (address.StartsWith("bitcoincash:"))
+                return address;
+
+            if (address.StartsWith("1") || address.StartsWith("3"))
+                return address.ToCashAddress();
+
+            return string.Concat("bitcoincash:", address);
         }
 
         private void SetOptions()

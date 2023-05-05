@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="NBitcoin.Altcoins" Version="3.0.17" />
+    <PackageReference Include="SharpCashAddr" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

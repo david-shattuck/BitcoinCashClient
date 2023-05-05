@@ -29,6 +29,7 @@
   <ItemGroup>
     <PackageReference Include="NBitcoin" Version="7.0.24" />
     <PackageReference Include="NBitcoin.Altcoins" Version="3.0.18" />
+    <PackageReference Include="SharpCashAddr" Version="1.0.0" />
     <PackageReference Include="Teronis.MSBuild.Packaging.ProjectBuildInPackage" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -48,7 +48,7 @@ Send the specified amount of Bitcoin Cash to the specified address.
 
 ```csharp
 // send one dollar's worth of BCH to the destination address
-wallet.Send("<destination-address>", 1m, Currency.USDollars);
+wallet.Send("<destination-address>", 1m, Currency.USDollar);
 ```
 
 
@@ -83,6 +83,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 ### 1.2
 
 - Support for many fiat currencies
+- Support for legacy addresses
 
 ### 1.1
 
