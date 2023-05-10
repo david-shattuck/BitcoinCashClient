@@ -6,13 +6,39 @@ using SharpCashAddr;
 
 namespace BitcoinCash.Models
 {
+    /// <summary>
+    /// A container for money and the tools to send it
+    /// </summary>
     public class Wallet
     {
+        /// <summary>
+        /// A very large secret number known only by the owner
+        /// </summary>
         public string? PrivateKey { get; set; }
+
+        /// <summary>
+        /// A safe-to-share unique identifier for this wallet
+        /// </summary>
         public string? PublicAddress { get; set; }
+
+        /// <summary>
+        /// The number of satoshis held in this wallet
+        /// </summary>
         public long? Balance => utxos?.Sum(u => u.value);
+
+        /// <summary>
+        /// The current market value of the balance of this wallet
+        /// </summary>
         public decimal? Value { get; set; }
+
+        /// <summary>
+        /// The fiat money denominating the value of this wallet
+        /// </summary>
         public string? ValueCurrency { get; set; }
+
+        /// <summary>
+        /// The list of all unspent transaction outputs in this wallet
+        /// </summary>
         public List<utxo>? utxos { get; set; }
 
         /// <summary>
@@ -251,7 +277,7 @@ namespace BitcoinCash.Models
                 throw new Exception("There are no utxos to spend");
         }
 
-        private string GetCashAddr(string address)
+        private static string GetCashAddr(string address)
         {
             if (address.StartsWith("bitcoincash:"))
                 return address;

@@ -6,24 +6,24 @@ using SharpCashAddr;
 
 namespace BitcoinCash
 {
+    /// <summary>
+    /// Create or fetch Bitcoin Cash wallets
+    /// </summary>
     public class BitcoinCashClient
     {
-        private readonly Network _network = BCash.Instance.Mainnet;
+        private string? _defaultCurrency;
+        private readonly Network _network = BCash.Instance.Mainnet;        
 
-        private readonly ApiClient _apiClient;
-        private string _defaultCurrency;
+        /// <summary>
+        /// Instantiate BchClient with default options
+        /// </summary>
+        public BitcoinCashClient() => SetOptions();
 
-        public BitcoinCashClient()
-        {
-            _apiClient = new ApiClient();
-            SetOptions();
-        }
-
-        public BitcoinCashClient(ClientOptions options)
-        {
-            _apiClient = new ApiClient();
-            SetOptions(options);
-        }
+        /// <summary>
+        /// Instantiate BchClient with custom options
+        /// </summary>
+        /// <param name="options">Configuration object with desired options set</param>
+        public BitcoinCashClient(ClientOptions options) => SetOptions(options);
 
         /// <summary>
         /// Generate a new private key and its associated public address
@@ -110,7 +110,7 @@ namespace BitcoinCash
         /// <returns>The current fiat value of BCH</returns>
         public decimal GetFiatValue()
         {
-            var fiatValue = _apiClient.GetFiatValue(_defaultCurrency);
+            var fiatValue = ApiClient.GetFiatValue(_defaultCurrency!);
 
             ValidateFiatValue(fiatValue);
 
@@ -126,7 +126,7 @@ namespace BitcoinCash
         {
             ValidateFiat(currency);
 
-            var fiatValue = _apiClient.GetFiatValue(currency.Value);
+            var fiatValue = ApiClient.GetFiatValue(currency.Value);
 
             ValidateFiatValue(fiatValue);
 
@@ -137,7 +137,7 @@ namespace BitcoinCash
         {
             var addresses = wallets.Select(w => w.PublicAddress).ToList();
 
-            var filledWallets = _apiClient.GetWalletInfo(addresses!, _defaultCurrency);
+            var filledWallets = ApiClient.GetWalletInfo(addresses!, _defaultCurrency!);
 
             return wallets.Select(w =>
             {
@@ -149,22 +149,9 @@ namespace BitcoinCash
 
                 return filledWallet;
             }).ToList();
-        }
+        }        
 
-        private static void ValidateFiat(Currency currency)
-        {
-            if (currency.Value == Currency.BitcoinCash.Value ||
-                currency.Value == Currency.Satoshis.Value)
-                throw new Exception("BCH cannot be used for fiat value pair");
-        }
-
-        private static void ValidateFiatValue(decimal value)
-        {
-            if (value == 0)
-                throw new Exception("Something went wrong while fetching fiat value of BCH");
-        }
-
-        private string GetCashAddr(string address)
+        private static string GetCashAddr(string address)
         {
             if (address.StartsWith("bitcoincash:"))
                 return address;
@@ -187,9 +174,28 @@ namespace BitcoinCash
 
         private void SetOptions(ClientOptions options)
         {
-            ValidateFiat(options.Currency);
+            ValidateOptions(options);
 
-            _defaultCurrency = options.Currency.Value;
+            _defaultCurrency = options.Currency != null ? options.Currency.Value : Currency.USDollar.Value;            
+        }
+
+        private static void ValidateOptions(ClientOptions options)
+        {
+            if (options.Currency != null)
+                ValidateFiat(options.Currency);
+        }
+
+        private static void ValidateFiat(Currency currency)
+        {
+            if (currency.Value == Currency.BitcoinCash.Value ||
+                currency.Value == Currency.Satoshis.Value)
+                throw new Exception("BCH cannot be used for fiat value pair");
+        }
+
+        private static void ValidateFiatValue(decimal value)
+        {
+            if (value == 0)
+                throw new Exception("Something went wrong while fetching fiat value of BCH");
         }
     }
 }

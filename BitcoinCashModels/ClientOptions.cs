@@ -1,7 +1,13 @@
 ﻿namespace BitcoinCash.Models
 {
+    /// <summary>
+    /// Configuration options for the BchClient
+    /// </summary>
     public class ClientOptions
     {
-        public Currency Currency { get; set; }
+        /// <summary>
+        /// The default fiat currency for the client
+        /// </summary>
+        public Currency? Currency { get; set; }
     }
 }

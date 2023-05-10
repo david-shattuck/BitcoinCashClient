@@ -66,8 +66,7 @@ Display("South African Rand wallet after Euro send", wallet);
 
 Console.ReadLine();
 
-
-void Display(string name, object obj)
+static void Display(string name, object obj)
 {
     Console.WriteLine();
     Console.WriteLine($"{name}:");

@@ -3,9 +3,18 @@ using Newtonsoft.Json;
 
 namespace BitcoinCash.Client
 {
+    /// <summary>
+    /// An interface to the back-end API
+    /// </summary>
     public class ApiClient
     {
-        public List<Wallet> GetWalletInfo(List<string> addresses, string currency)
+        /// <summary>
+        /// Get utxos and current value of specified wallets
+        /// </summary>
+        /// <param name="addresses">Public addresses of wallets to lookup</param>
+        /// <param name="currency">Fiat currency to denominate wallet value</param>
+        /// <returns>A list of wallets with utxos and value populated</returns>
+        public static List<Wallet> GetWalletInfo(List<string> addresses, string currency)
         {
             var addrs = string.Join(",", addresses);
 
@@ -14,7 +23,12 @@ namespace BitcoinCash.Client
             return GetFromApi<List<Wallet>>(url);
         }
 
-        public decimal GetFiatValue(string currency)
+        /// <summary>
+        /// Get the current market value of Bitcoin Cash
+        /// </summary>
+        /// <param name="currency">Fiat currency to denominate return value</param>
+        /// <returns>The current market value of BCH</returns>
+        public static decimal GetFiatValue(string currency)
         {
             var url = $"{Constants.ApiUrl}/fiat/getvalue?currency={currency}";
 
