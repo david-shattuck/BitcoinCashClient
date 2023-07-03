@@ -42,6 +42,11 @@ namespace BitcoinCash.Models
         public List<utxo>? utxos { get; set; }
 
         /// <summary>
+        /// The hash of the most recent transaction broadcast by this wallet
+        /// </summary>
+        public string? LastTxId { get; private set; }
+
+        /// <summary>
         /// Send the specified amount to the specified address
         /// </summary>
         /// <param name="sendTo">A valid BCH address - the recipient of this send</param>
@@ -130,11 +135,14 @@ namespace BitcoinCash.Models
 
         private void SetSendSats(decimal sendAmount, Currency sendCurrency)
         {
-            if (sendCurrency == Currency.BitcoinCash)
-                _sendSats = (long)(sendAmount * Constants.SatoshiMultiplier);
+            if (sendCurrency.Value == Currency.BitcoinCash.Value)
+                _sendSats = (long)(sendAmount * Constants.SatoshiMultiplier);             
 
-            if (sendCurrency == Currency.Satoshis)
+            if (sendCurrency.Value == Currency.Satoshis.Value)
                 _sendSats = (long)sendAmount;
+
+            if (_sendSats > 0)
+                return;
 
             if (sendCurrency.Value == ValueCurrency)
                 _sendSats = (long)(sendAmount / _bchValue! * Constants.SatoshiMultiplier);
@@ -308,6 +316,9 @@ namespace BitcoinCash.Models
 
         private void Cleanup()
         {
+            var txHash = _transaction!.GetHash().ToString();
+            LastTxId = txHash;
+
             if (_sendAll)
             {
                 utxos = new List<utxo>();
@@ -326,7 +337,7 @@ namespace BitcoinCash.Models
                 {
                     address = _address!.ToString()[12..],
                     block_id = 10000000,
-                    transaction_hash = _transaction!.GetHash().ToString(),
+                    transaction_hash = txHash,
                     index = 1,
                     value = _utxos!.Sum(u => u.value) - _sendSats - _devDonation - _totalFee
                 });

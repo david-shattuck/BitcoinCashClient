@@ -24,6 +24,20 @@ namespace BitcoinCash.Client
         }
 
         /// <summary>
+        /// Get the list of tx hashes from provided list that exist in the blockchain or mempool
+        /// </summary>
+        /// <param name="hashes">The list of transaction hashes to be checked</param>
+        /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
+        public static List<string> GetValidTxHashes(List<string> hashes)
+        {
+            var hashCsv = string.Join(',', hashes);
+
+            var url = $"{Constants.ApiUrl}/transaction/getvalidtxhashes?hashes={hashCsv}";
+
+            return GetFromApi<List<string>>(url);
+        }
+
+        /// <summary>
         /// Get the current market value of Bitcoin Cash
         /// </summary>
         /// <param name="currency">Fiat currency to denominate return value</param>

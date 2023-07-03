@@ -105,6 +105,13 @@ namespace BitcoinCash
         }
 
         /// <summary>
+        /// Get the list of tx hashes from provided list that exist in the blockchain or mempool
+        /// </summary>
+        /// <param name="txHashes">The list of transaction hashes to be checked</param>
+        /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
+        public List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
+
+        /// <summary>
         /// Get the current market value of BCH in the default fiat currency
         /// </summary>
         /// <returns>The current fiat value of BCH</returns>

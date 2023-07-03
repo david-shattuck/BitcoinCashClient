@@ -41,5 +41,39 @@ namespace BitcoinCash.API.Clients
                 return new List<utxo>();
             }
         }
+
+        public List<string> GetValidTxHashes(List<string> hashes)
+        {
+            var validTxHashes = new List<string>();
+
+            int pageSize = 10;
+            int pages = (hashes.Count - 1) / pageSize + 1;
+
+            using (var client = new HttpClient())
+            {
+                for(var i = 0; i < pages; i++)
+                {
+                    var batchHashes = hashes.Skip(i * pageSize).Take(pageSize).ToList();
+                    var hashCsv = string.Join(",", batchHashes);
+
+                    var response = client.GetAsync($"{_baseUrl}/dashboards/transactions/{hashCsv}?key={_key}").Result;
+
+                    if(!response.IsSuccessStatusCode)
+                        return new List<string>();
+
+                    var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+                    foreach(var hash in batchHashes)
+                    {
+                        var tx = jo?["data"]?[hash]?.ToString();
+
+                        if (!string.IsNullOrWhiteSpace(tx))
+                            validTxHashes.Add(hash);
+                    }
+                }
+            }
+
+            return validTxHashes;
+        }
     }
 }

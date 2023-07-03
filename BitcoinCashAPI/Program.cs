@@ -10,6 +10,7 @@ builder.Services.AddMemoryCache();
 // services
 builder.Services.AddTransient<IFiatService, FiatService>();
 builder.Services.AddTransient<IWalletService, WalletService>();
+builder.Services.AddTransient<ITransactionService, TransactionService>();
 
 // clients
 builder.Services.AddTransient<ICoinGeckoClient, CoinGeckoClient>();
