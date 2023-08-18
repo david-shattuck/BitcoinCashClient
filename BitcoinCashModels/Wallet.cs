@@ -53,7 +53,7 @@ namespace BitcoinCash.Models
         /// <param name="sendAmount">The amount to send </param>
         /// <param name="sendCurrency">The currency units of the send amount</param>
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
-        public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = false)
+        public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = true)
         {
             VerifyUtxos();
             SetBaseFee();
@@ -69,7 +69,7 @@ namespace BitcoinCash.Models
         /// </summary>
         /// <param name="sendTo">A valid BCH address - the recipient of this send</param>
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
-        public void SendAll(string sendTo, bool donateToDev = false)
+        public void SendAll(string sendTo, bool donateToDev = true)
         {
             _sendAll = true;
             VerifyUtxos();
