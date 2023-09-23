@@ -63,13 +63,17 @@ namespace BitcoinCash.API.Clients
 
                     var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
-                    foreach(var hash in batchHashes)
+                    try
                     {
-                        var tx = jo?["data"]?[hash]?.ToString();
+                        foreach (var hash in batchHashes)
+                        {
+                            var tx = jo?["data"]?[hash]?.ToString();
 
-                        if (!string.IsNullOrWhiteSpace(tx))
-                            validTxHashes.Add(hash);
-                    }
+                            if (!string.IsNullOrWhiteSpace(tx))
+                                validTxHashes.Add(hash);
+                        }
+                    } catch (Exception) {}
+                    
                 }
             }
 
