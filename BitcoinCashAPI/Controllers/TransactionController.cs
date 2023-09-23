@@ -18,7 +18,7 @@ namespace BitcoinCash.API.Controllers
         [Route("GetValidTxHashes")]
         public List<string> GetValidTxHashes(string hashes)
         {
-            var hashList = hashes.Split(',').ToList();
+            var hashList = hashes.Split(',').Distinct().ToList();
 
             return _transactionService.GetValidTxHashes(hashList);
         }
