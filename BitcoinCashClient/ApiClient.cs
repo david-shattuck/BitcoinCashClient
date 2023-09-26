@@ -24,6 +24,20 @@ namespace BitcoinCash.Client
         }
 
         /// <summary>
+        /// Get current balances of specified wallets
+        /// </summary>
+        /// <param name="addresses">Public addresses of wallets to lookup</param>
+        /// <returns>A list of addresses with their current balances. Empty wallets will not be included.</returns>
+        public static List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
+        {
+            var addrs = string.Join(",", addresses);
+
+            var url = $"{Constants.ApiUrl}/wallet/getbalances?addresses={addrs}";
+
+            return GetFromApi<List<KeyValuePair<string, long>>>(url);
+        }
+
+        /// <summary>
         /// Get the list of tx hashes from provided list that exist in the blockchain or mempool
         /// </summary>
         /// <param name="hashes">The list of transaction hashes to be checked</param>

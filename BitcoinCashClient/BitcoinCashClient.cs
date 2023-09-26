@@ -105,6 +105,21 @@ namespace BitcoinCash
         }
 
         /// <summary>
+        /// Get the current balances of all addresses in the provided list that have balances
+        /// </summary>
+        /// <param name="addresses">The list of addresses to be checked</param>
+        /// <returns>A list that includes every address that has a non-0 balance along with its associated balance</returns>
+        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
+        {
+            if (addresses.Count == 0)
+                return new List<KeyValuePair<string, long>>();
+
+            var balances = ApiClient.GetWalletBalances(addresses);
+
+            return balances.Select(b => new KeyValuePair<string, long>(GetCashAddr(b.Key), b.Value)).ToList();
+        }
+
+        /// <summary>
         /// Get the list of tx hashes from provided list that exist in the blockchain or mempool
         /// </summary>
         /// <param name="txHashes">The list of transaction hashes to be checked</param>

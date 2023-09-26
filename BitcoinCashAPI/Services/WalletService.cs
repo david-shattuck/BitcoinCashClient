@@ -32,5 +32,7 @@ namespace BitcoinCash.API.Services
 
             return wallets;
         }
+
+        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses) => _blockChairClient.GetWalletBalances(addresses);
     }
 }

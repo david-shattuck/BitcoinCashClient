@@ -79,5 +79,37 @@ namespace BitcoinCash.API.Clients
 
             return validTxHashes;
         }
+
+        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
+        {
+            var walletBalances = new List<KeyValuePair<string, long>>();
+
+            using (var client = new HttpClient())
+            {
+                addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
+                var addressCsv = string.Join(",", addresses);
+
+                var response = client.GetAsync($"{_baseUrl}/addresses/balances?addresses={addressCsv}&key={_key}").Result;
+
+                if (!response.IsSuccessStatusCode)
+                    return walletBalances;
+
+                var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+
+                try
+                {
+                    foreach (var address in addresses)
+                    {
+                        var balance = jo?["data"]?[address]?.ToString();
+
+                        if (!string.IsNullOrWhiteSpace(balance))
+                            walletBalances.Add(new KeyValuePair<string, long>(address, Convert.ToInt64(balance)));
+                    }
+                }
+                catch (Exception) { }
+            }
+
+            return walletBalances;
+        }
     }
 }
