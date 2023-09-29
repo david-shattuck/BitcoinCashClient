@@ -80,6 +80,11 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
+### 1.4
+
+- Convert address to CashAddr format
+- Check if address is valid
+
 ### 1.3
 
 - Mass wallet balance check

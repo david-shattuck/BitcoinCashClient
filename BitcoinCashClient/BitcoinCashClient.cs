@@ -127,6 +127,39 @@ namespace BitcoinCash
         public List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
 
         /// <summary>
+        /// Convert a BCH address in any valid format into CashAddr
+        /// </summary>
+        /// <param name="address">Any legacy or modern BCH address</param>
+        /// <returns>A CashAddr format BCH address or an empty string if input was invalid</returns>
+        public string GetCashAddr(string address)
+        {
+            if (address.StartsWith("1") || address.StartsWith("3"))
+                address = address.ToCashAddress();
+
+            if (!address.StartsWith("bitcoincash:"))
+                address = string.Concat("bitcoincash:", address);
+
+            return IsAddressValid(address) ? address : string.Empty;
+        }
+
+        /// <summary>
+        /// Check to see if given string is valid BCH address
+        /// </summary>
+        /// <param name="address">The address to check</param>
+        /// <returns>True if address is valid, otherwise false</returns>
+        public bool IsAddressValid(string address)
+        {
+            try
+            {
+                BitcoinAddress.Create(address, _network);
+                return true;
+            } catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Get the current market value of BCH in the default fiat currency
         /// </summary>
         /// <returns>The current fiat value of BCH</returns>
@@ -171,17 +204,6 @@ namespace BitcoinCash
 
                 return filledWallet;
             }).ToList();
-        }        
-
-        private static string GetCashAddr(string address)
-        {
-            if (address.StartsWith("bitcoincash:"))
-                return address;
-
-            if (address.StartsWith("1") || address.StartsWith("3"))
-                return address.ToCashAddress();
-
-            return string.Concat("bitcoincash:", address);
         }
 
         private void SetOptions()
