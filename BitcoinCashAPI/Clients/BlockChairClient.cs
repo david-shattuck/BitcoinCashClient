@@ -89,7 +89,14 @@ namespace BitcoinCash.API.Clients
                 addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
                 var addressCsv = string.Join(",", addresses);
 
-                var response = client.GetAsync($"{_baseUrl}/addresses/balances?addresses={addressCsv}&key={_key}").Result;
+
+                var stringContent = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("addresses", addressCsv),
+                    new KeyValuePair<string, string>("key", _key)
+                });
+
+                var response = client.PostAsync($"{_baseUrl}/addresses/balances", stringContent).Result;
 
                 if (!response.IsSuccessStatusCode)
                     return walletBalances;

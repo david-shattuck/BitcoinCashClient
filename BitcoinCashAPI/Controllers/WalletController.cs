@@ -23,9 +23,9 @@ namespace BitcoinCash.API.Controllers
             return _walletService.GetWalletInfo(addressList, currency);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetBalances")]
-        public List<KeyValuePair<string, long>> GetBalances(string addresses)
+        public List<KeyValuePair<string, long>> GetBalances([FromForm] string addresses)
         {
             var addressList = addresses.Split(',').ToList();
 

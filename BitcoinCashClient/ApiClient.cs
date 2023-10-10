@@ -32,9 +32,14 @@ namespace BitcoinCash.Client
         {
             var addrs = string.Join(",", addresses);
 
-            var url = $"{Constants.ApiUrl}/wallet/getbalances?addresses={addrs}";
+            var url = $"{Constants.ApiUrl}/wallet/getbalances";
 
-            return GetFromApi<List<KeyValuePair<string, long>>>(url);
+            var data = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string> ("addresses", addrs)
+            };
+
+            return PostToApi<List<KeyValuePair<string, long>>>(url, data);
         }
 
         /// <summary>
@@ -68,6 +73,19 @@ namespace BitcoinCash.Client
             var client = new HttpClient();
 
             var response = client.GetAsync(url).Result;
+
+            var result = response.Content.ReadAsStringAsync().Result;
+
+            return JsonConvert.DeserializeObject<T>(result)!;
+        }
+
+        private static T PostToApi<T>(string url, List<KeyValuePair<string, string>> data)
+        {
+            var client = new HttpClient();
+
+            var stringContent = new FormUrlEncodedContent(data);
+
+            var response = client.PostAsync(url, stringContent).Result;
 
             var result = response.Content.ReadAsStringAsync().Result;
 
