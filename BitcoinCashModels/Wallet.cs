@@ -182,7 +182,7 @@ namespace BitcoinCash.Models
 
             _utxos = new List<utxo>();
 
-            var totalSend = _sendSats + _devDonation + _baseFee;
+            var totalSend = _sendSats + _devDonation + _baseFee + _baseFee;
 
             if (_donateToDev)
                 totalSend += _baseFee;
@@ -202,7 +202,7 @@ namespace BitcoinCash.Models
 
         private void SetTotalFee()
         {
-            var ioCount = _utxos!.Count + (_donateToDev ? 1 : 0) + 1;
+            var ioCount = _utxos!.Count + (_donateToDev ? 1 : 0) + 1 + (_sendAll ? 0 : 1);
             _totalFee = _baseFee * ioCount;
 
             if (_sendAll)
@@ -241,7 +241,7 @@ namespace BitcoinCash.Models
 
             _transaction!.Outputs.Add(sendMoney, _toAddress!.ScriptPubKey);
 
-            if (changeMoney.Satoshi > 0)
+            if (changeMoney.Satoshi > _baseFee)
             {
                 _transaction.Outputs.Add(changeMoney, _address!.ScriptPubKey);
                 _makeChange = true;
