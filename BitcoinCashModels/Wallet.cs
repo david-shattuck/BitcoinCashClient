@@ -268,7 +268,16 @@ namespace BitcoinCash.Models
 
         private void Broadcast()
         {
-            using var node = Node.Connect(_network, "seed.bchd.cash:8333");
+            foreach (var nodeAddress in Constants.Nodes)
+            {
+                var thread = new Thread(() => BroadcastToNode(nodeAddress));
+                thread.Start();
+            }            
+        }
+
+        private void BroadcastToNode(string nodeAddress)
+        {
+            using var node = Node.Connect(_network, nodeAddress);
 
             node.VersionHandshake();
 
