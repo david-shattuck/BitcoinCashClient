@@ -268,16 +268,7 @@ namespace BitcoinCash.Models
 
         private void Broadcast()
         {
-            foreach (var nodeAddress in Constants.Nodes)
-            {
-                var thread = new Thread(() => BroadcastToNode(nodeAddress));
-                thread.Start();
-            }            
-        }
-
-        private void BroadcastToNode(string nodeAddress)
-        {
-            using var node = Node.Connect(_network, nodeAddress);
+            using var node = Node.Connect(_network, "bch.greyh.at:8333");
 
             node.VersionHandshake();
 

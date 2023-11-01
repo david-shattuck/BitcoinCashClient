@@ -22,18 +22,5 @@ namespace BitcoinCash.Models
         /// The number of Satoshis in a single BCH coin
         /// </summary>
         public const int SatoshiMultiplier = 100000000;
-
-        /// <summary>
-        /// The list of BCH full nodes for tx broadcasting
-        /// </summary>
-        public static readonly IList<string> Nodes = new ReadOnlyCollection<string>
-        (
-            new List<string>
-            {
-                "cashnode.bch.ninja:8333",
-                "bch.imaginary.cash:8333",
-                "seed.bchd.cash:8333"
-            }
-        );
     }
 }
