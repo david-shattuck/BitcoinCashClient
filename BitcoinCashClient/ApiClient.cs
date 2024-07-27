@@ -36,7 +36,7 @@ namespace BitcoinCash.Client
 
             var data = new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string> ("addresses", addrs)
+                new("addresses", addrs)
             };
 
             return PostToApi<List<KeyValuePair<string, long>>>(url, data);

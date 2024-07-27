@@ -5,14 +5,9 @@ namespace BitcoinCash.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class TransactionController : ControllerBase
+    public class TransactionController(ITransactionService transactionService) : ControllerBase
     {        
-        private readonly ITransactionService _transactionService;
-
-        public TransactionController(ITransactionService transactionService)
-        {
-            _transactionService = transactionService;
-        }
+        private readonly ITransactionService _transactionService = transactionService;
 
         [HttpGet]
         [Route("GetValidTxHashes")]

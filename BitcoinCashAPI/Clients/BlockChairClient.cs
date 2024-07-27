@@ -16,7 +16,7 @@ namespace BitcoinCash.API.Clients
         public BlockChairClient(IConfiguration configuration)
         {
             _configuration = configuration;
-            _key = _configuration["BlockchairAPIKey"];
+            _key = _configuration["BlockchairAPIKey"] ?? "";
         }
 
         public List<utxo> GetUtxos(List<string> addresses)
@@ -38,7 +38,7 @@ namespace BitcoinCash.API.Clients
             }
             catch (Exception)
             {
-                return new List<utxo>();
+                return [];
             }
         }
 
@@ -59,7 +59,7 @@ namespace BitcoinCash.API.Clients
                     var response = client.GetAsync($"{_baseUrl}/dashboards/transactions/{hashCsv}?key={_key}").Result;
 
                     if(!response.IsSuccessStatusCode)
-                        return new List<string>();
+                        return [];
 
                     var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
@@ -90,11 +90,11 @@ namespace BitcoinCash.API.Clients
                 var addressCsv = string.Join(",", addresses);
 
 
-                var stringContent = new FormUrlEncodedContent(new[]
-                {
+                var stringContent = new FormUrlEncodedContent(
+                [
                     new KeyValuePair<string, string>("addresses", addressCsv),
                     new KeyValuePair<string, string>("key", _key)
-                });
+                ]);
 
                 var response = client.PostAsync($"{_baseUrl}/addresses/balances", stringContent).Result;
 

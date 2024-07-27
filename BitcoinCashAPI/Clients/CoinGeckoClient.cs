@@ -4,17 +4,12 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BitcoinCash.API.Clients
 {
-    public class CoinGeckoClient : ICoinGeckoClient
+    public class CoinGeckoClient(IMemoryCache cache) : ICoinGeckoClient
     {
         // https://www.coingecko.com/en/api/documentation
         private readonly string _baseUrl = "https://api.coingecko.com/api/v3";
 
-        private readonly IMemoryCache _cache;
-
-        public CoinGeckoClient(IMemoryCache cache)
-        {
-            _cache = cache;
-        }
+        private readonly IMemoryCache _cache = cache;
 
         public decimal GetValue(string currency = "usd")
         {

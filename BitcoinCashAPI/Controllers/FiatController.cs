@@ -5,14 +5,9 @@ namespace BitcoinCash.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class FiatController : ControllerBase
+    public class FiatController(IFiatService fiatService) : ControllerBase
     {        
-        private readonly IFiatService _fiatService;
-
-        public FiatController(IFiatService fiatService)
-        {
-            _fiatService = fiatService;
-        }
+        private readonly IFiatService _fiatService = fiatService;
 
         [HttpGet]
         [Route("[action]")]

@@ -180,7 +180,7 @@ namespace BitcoinCash.Models
                 return;
             }
 
-            _utxos = new List<utxo>();
+            _utxos = [];
 
             var totalSend = _sendSats + _devDonation + _baseFee + _baseFee;
 
@@ -321,7 +321,7 @@ namespace BitcoinCash.Models
 
             if (_sendAll)
             {
-                utxos = new List<utxo>();
+                utxos = [];
                 Value = 0;
                 return;
             }

@@ -8,9 +8,7 @@ This library provides a simple interface enabling on-chain sending and receiving
 
 Private keys are never exposed. [Don't trust. Verify.](https://github.com/david-shattuck/BitcoinCashClient)
 
-
 ## How to Use
-
 
 ### Instantiate
 
@@ -20,7 +18,6 @@ using BitcoinCash;
 var client = new BitcoinCashClient();
 ```
 
-
 ### Create new wallet
 
 Generate a new Bitcoin Cash private key and its associated public address.
@@ -28,7 +25,6 @@ Generate a new Bitcoin Cash private key and its associated public address.
 ```csharp
 var wallet = client.GetWallet();
 ```
-
 
 ### Get existing live wallet
 
@@ -39,10 +35,9 @@ var privateKey = "<your-private-key>";
 var wallet = client.GetWallet(privateKey);
 ```
 
-*Note: Again, the private key is never exposed. The key is used to compute the public address, which is then used to fetch the wallet info from a block explorer.*
+_Note: Again, the private key is never exposed. The key is used to compute the public address, which is then used to fetch the wallet info from a block explorer._
 
-
-### Send 
+### Send
 
 Send the specified amount of Bitcoin Cash to the specified address.
 
@@ -50,7 +45,6 @@ Send the specified amount of Bitcoin Cash to the specified address.
 // send one dollar's worth of BCH to the destination address
 wallet.Send("<destination-address>", 1m, Currency.USDollar);
 ```
-
 
 ### Send All
 
@@ -60,16 +54,14 @@ Send the entire wallet balance to the specified address.
 wallet.SendAll("<destination-address>");
 ```
 
-
 ### Get existing read-only wallet
 
-Use a public address to get a read-only wallet. 
+Use a public address to get a read-only wallet.
 
 ```csharp
 var publicAddress = "<any-valid-bch-address>";
 var wallet = client.GetWalletByAddress(publicAddress);
 ```
-
 
 ## Links
 
@@ -77,8 +69,11 @@ Please view [the sample project](https://github.com/david-shattuck/BitcoinCashCl
 
 For a detailed explanation of the code, please see [this tutorial](https://read.cash/@thanah85/bitcoin-cash-payments-using-c-and-net-f1c4b00d).
 
-
 ## Version History
+
+### 1.5
+
+- .NET 8 and C# 12
 
 ### 1.4
 
@@ -109,6 +104,6 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 - Send specified amount of USD or BCH to specified address
 - Send entire wallet balance to specified address
 
-
 ## Feedback
+
 BitcoinCashClient is released as open source under the [MIT license](https://github.com/david-shattuck/BitcoinCashClient/blob/main/LICENSE). Bug reports and contributions are welcome at [the GitHub repository](https://github.com/david-shattuck/BitcoinCashClient).

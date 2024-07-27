@@ -4,16 +4,10 @@ using BitcoinCash.Models;
 
 namespace BitcoinCash.API.Services
 {
-    public class WalletService : IWalletService
+    public class WalletService(ICoinGeckoClient coinGeckoClient, IBlockChairClient blockChairClient) : IWalletService
     {
-        private readonly IBlockChairClient _blockChairClient;
-        private readonly ICoinGeckoClient _coinGeckoClient;
-
-        public WalletService(ICoinGeckoClient coinGeckoClient, IBlockChairClient blockChairClient)
-        {
-            _coinGeckoClient = coinGeckoClient;
-            _blockChairClient = blockChairClient;
-        }
+        private readonly IBlockChairClient _blockChairClient = blockChairClient;
+        private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
 
         public List<Wallet> GetWalletInfo(List<string> addresses, string currency)
         {
@@ -26,7 +20,7 @@ namespace BitcoinCash.API.Services
             wallets.ForEach(w =>
             {
                 w.utxos = utxos.Where(u => u.cashAddr == w.PublicAddress).ToList();
-                w.Value = bchValue == 0 ? null : (decimal)w.Balance! / 100000000 * bchValue;
+                w.Value = bchValue == 0 ? null : (decimal)w.Balance! / Constants.SatoshiMultiplier * bchValue;
                 w.ValueCurrency = currency;
             });
 

@@ -39,7 +39,7 @@ namespace BitcoinCash
             {
                 PrivateKey = secret.ToString(),
                 PublicAddress = address.ToString(),
-                utxos = new List<utxo>(),
+                utxos = [],
                 Value = 0,
                 ValueCurrency = _defaultCurrency
             };
@@ -52,7 +52,7 @@ namespace BitcoinCash
         /// <returns>A live wallet, including its public address, sendable balance, value, and utxos</returns>
         public Wallet GetWallet(string privateKey)
         {
-            return GetWallets(new List<string> { privateKey }).First();
+            return GetWallets([privateKey]).First();
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace BitcoinCash
         /// <returns>A read-only wallet, including its balance, value, and utxos</returns>
         public Wallet GetWalletByAddress(string address)
         {
-            return GetWalletsByAddresses(new List<string> { address }).First();
+            return GetWalletsByAddresses([address]).First();
         }        
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace BitcoinCash
         public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
         {
             if (addresses.Count == 0)
-                return new List<KeyValuePair<string, long>>();
+                return [];
 
             var balances = ApiClient.GetWalletBalances(addresses);
 
@@ -124,7 +124,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="txHashes">The list of transaction hashes to be checked</param>
         /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
-        public List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
+        public static List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
 
         /// <summary>
         /// Convert a BCH address in any valid format into CashAddr
@@ -177,7 +177,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="currency">A Currency object from BitcoinCash.Models.Currency</param>
         /// <returns>The current fiat value of BCH</returns>
-        public decimal GetFiatValue(Currency currency)
+        public static decimal GetFiatValue(Currency currency)
         {
             ValidateFiat(currency);
 

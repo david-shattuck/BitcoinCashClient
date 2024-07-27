@@ -1,6 +1,4 @@
-﻿using System.Collections.ObjectModel;
-
-namespace BitcoinCash.Models
+﻿namespace BitcoinCash.Models
 {
     /// <summary>
     /// Unchanging variables used in multiple places

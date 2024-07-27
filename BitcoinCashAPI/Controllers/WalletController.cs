@@ -6,14 +6,9 @@ namespace BitcoinCash.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WalletController : ControllerBase
+    public class WalletController(IWalletService walletService) : ControllerBase
     {        
-        private readonly IWalletService _walletService;
-
-        public WalletController(IWalletService walletService)
-        {
-            _walletService = walletService;
-        }
+        private readonly IWalletService _walletService = walletService;
 
         [HttpGet]
         public List<Wallet> Get(string addresses, string currency)
