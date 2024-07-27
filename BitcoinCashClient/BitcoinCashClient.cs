@@ -124,7 +124,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="txHashes">The list of transaction hashes to be checked</param>
         /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
-        public static List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
+        public List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
 
         /// <summary>
         /// Convert a BCH address in any valid format into CashAddr
@@ -177,7 +177,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="currency">A Currency object from BitcoinCash.Models.Currency</param>
         /// <returns>The current fiat value of BCH</returns>
-        public static decimal GetFiatValue(Currency currency)
+        public decimal GetFiatValue(Currency currency)
         {
             ValidateFiat(currency);
 
