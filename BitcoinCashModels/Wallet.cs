@@ -55,14 +55,17 @@ namespace BitcoinCash.Models
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
         public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = true)
         {
-            VerifyUtxos();
-            SetBaseFee();
-            SetSendSats(sendAmount, sendCurrency);
-            SetDevDonation(donateToDev);
-            SetAddresses(sendTo);
+            var sends = new List<Send>
+            {
+                new() {
+                    To = sendTo,
+                    Amount = sendAmount,
+                    Currency = sendCurrency
+                }
+            };
 
-            BaseSend();
-        }
+            SendToMany(sends, donateToDev);
+        }        
 
         /// <summary>
         /// Send the entire wallet balance to the specified address
@@ -72,17 +75,36 @@ namespace BitcoinCash.Models
         public void SendAll(string sendTo, bool donateToDev = true)
         {
             _sendAll = true;
-            VerifyUtxos();
-            SetBaseFee();
-            SetSendSats();
-            SetDevDonation(donateToDev);
-            SetAddresses(sendTo);
+
+            var sends = new List<Send>
+            {
+                new() { To = sendTo }
+            };
+
+            SendToMany(sends, donateToDev);
+        }
+
+        /// <summary>
+        /// Send any amount to multiple addresses in a single transaction
+        /// </summary>
+        /// <param name="sends">The list of recipient addresses and how much each should receive</param>
+        /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
+        public void SendToMany(List<Send> sends, bool donateToDev = true)
+        {
+            _sends = sends;
+            _donateToDev = donateToDev;
 
             BaseSend();
         }
 
         private void BaseSend()
         {
+            VerifyUtxos();
+            VerifySends();
+            SetBaseFee();
+            SetSendSats();
+            SetDevDonation();
+            SetAddress();
             SetSendUtxos();
             SetTotalFee();
             Create();
@@ -103,7 +125,7 @@ namespace BitcoinCash.Models
         private List<utxo>? _utxos;
         private BitcoinSecret? _secret;
         private BitcoinAddress? _address;
-        private BitcoinAddress? _toAddress;
+        private List<Send>? _sends;
         private Transaction? _transaction;
 
         private readonly Network _network = BCash.Instance.Mainnet;
@@ -131,28 +153,23 @@ namespace BitcoinCash.Models
             _baseFee = (long)(baseFeeInUSD / bchValueInUSD * Constants.SatoshiMultiplier);
         }
 
-        private void SetSendSats() => _sendSats = utxos!.Sum(u => u.value);
-
-        private void SetSendSats(decimal sendAmount, Currency sendCurrency)
+        private void SetSendSats()
         {
-            if (sendCurrency.Value == Currency.BitcoinCash.Value)
-                _sendSats = (long)(sendAmount * Constants.SatoshiMultiplier);             
-
-            if (sendCurrency.Value == Currency.Satoshis.Value)
-                _sendSats = (long)sendAmount;
-
-            if (_sendSats > 0)
+            if (_sendAll)
+            {
+                _sendSats = utxos!.Sum(u => u.value);
                 return;
+            }
 
-            if (sendCurrency.Value == ValueCurrency)
-                _sendSats = (long)(sendAmount / _bchValue! * Constants.SatoshiMultiplier);
-            else
-                _sendSats = (long)(sendAmount / GetFiatValue(sendCurrency) * Constants.SatoshiMultiplier);
+            _sendSats = 0;
+
+            foreach (var send in _sends!)
+                _sendSats += GetSendSatsAmount(send);
         }
 
-        private void SetDevDonation(bool donate)
+        private void SetDevDonation()
         {
-            _devDonation = (long)(donate ? _sendSats * 0.001 : 0);
+            _devDonation = (long)(_donateToDev ? _sendSats * 0.001 : 0);
             if (_devDonation < _baseFee * 10)
                 _devDonation = 0;
 
@@ -162,14 +179,13 @@ namespace BitcoinCash.Models
                 _sendSats -= _devDonation;
         }
 
-        private void SetAddresses(string sendTo)
+        private void SetAddress()
         {
             if (string.IsNullOrWhiteSpace(PrivateKey))
                 throw new Exception("Cannot send transaction without private key");
 
             _secret = new BitcoinSecret(PrivateKey, _network);
             _address = _secret.GetAddress(ScriptPubKeyType.Legacy);
-            _toAddress = BitcoinAddress.Create(GetCashAddr(sendTo), _network);
         }
 
         private void SetSendUtxos()
@@ -182,7 +198,7 @@ namespace BitcoinCash.Models
 
             _utxos = [];
 
-            var totalSend = _sendSats + _devDonation + _baseFee + _baseFee;
+            var totalSend = _sendSats + _devDonation + (_sends!.Count * _baseFee) + _baseFee;
 
             if (_donateToDev)
                 totalSend += _baseFee;
@@ -202,7 +218,7 @@ namespace BitcoinCash.Models
 
         private void SetTotalFee()
         {
-            var ioCount = _utxos!.Count + (_donateToDev ? 1 : 0) + 1 + (_sendAll ? 0 : 1);
+            var ioCount = _utxos!.Count + _sends!.Count + (_donateToDev ? 1 : 0) + (_sendAll ? 0 : 1);
             _totalFee = _baseFee * ioCount;
 
             if (_sendAll)
@@ -236,20 +252,26 @@ namespace BitcoinCash.Models
             var inputMoney = new Money(utxoTotal, MoneyUnit.Satoshi);
             var sendMoney = new Money(_sendSats, MoneyUnit.Satoshi);
             var devMoney = new Money(_devDonation, MoneyUnit.Satoshi);
-            var minerFee = new Money(_totalFee, MoneyUnit.Satoshi);
-            var changeMoney = inputMoney - sendMoney - devMoney - minerFee;
+            var minerMoney = new Money(_totalFee, MoneyUnit.Satoshi);
+            var changeMoney = inputMoney - sendMoney - devMoney - minerMoney;
 
-            _transaction!.Outputs.Add(sendMoney, _toAddress!.ScriptPubKey);
+            foreach(var send in _sends!)
+            {
+                var toAddress = BitcoinAddress.Create(GetCashAddr(send.To), _network);
+                var toMoney = new Money(_sendAll ? _sendSats : GetSendSatsAmount(send), MoneyUnit.Satoshi);
+
+                _transaction!.Outputs.Add(toMoney, toAddress!.ScriptPubKey);
+            }
 
             if (changeMoney.Satoshi > _baseFee)
             {
-                _transaction.Outputs.Add(changeMoney, _address!.ScriptPubKey);
+                _transaction!.Outputs.Add(changeMoney, _address!.ScriptPubKey);
                 _makeChange = true;
             }                
 
             if (_donateToDev)
-                _transaction.Outputs.Add(devMoney, devAddress.ScriptPubKey);            
-        }
+                _transaction!.Outputs.Add(devMoney, devAddress.ScriptPubKey);            
+        }        
 
         private void Sign()
         {
@@ -283,6 +305,33 @@ namespace BitcoinCash.Models
         {
             if (utxos == null || utxos.Count == 0)
                 throw new Exception("There are no utxos to spend");
+        }
+
+        private void VerifySends()
+        {
+            if (_sendAll)
+                return;
+            
+            if (_sends == null || _sends.Count == 0)
+                throw new Exception("There are no sends to broadcast");
+
+            foreach (var send in _sends)
+                if (string.IsNullOrWhiteSpace(send.To) || send.Amount == null || send.Currency == null)
+                    throw new Exception("Improperly formed Send");
+        }
+
+        private long GetSendSatsAmount(Send send)
+        {
+            if (send.Currency!.Value == Currency.BitcoinCash.Value)
+                return (long)(send.Amount! * Constants.SatoshiMultiplier);            
+
+            if (send.Currency.Value == Currency.Satoshis.Value)
+                return (long)send.Amount!;
+
+            if (send.Currency.Value == ValueCurrency)
+                return (long)(send.Amount! / _bchValue! * Constants.SatoshiMultiplier);
+            else
+                return (long)(send.Amount! / GetFiatValue(send.Currency) * Constants.SatoshiMultiplier);
         }
 
         private static string GetCashAddr(string address)

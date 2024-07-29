@@ -74,6 +74,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 ### 1.5
 
 - .NET 8 and C# 12
+- Send to many
 
 ### 1.4
 

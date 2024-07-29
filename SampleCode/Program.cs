@@ -25,6 +25,29 @@ sendAmount = 0.1m;
 wallet.Send(sampleAddress, sendAmount, Currency.USDollar);
 Display("wallet after usd send", wallet);
 
+// send $0.10 to many addresses
+var sendToaddresses = new List<string>
+{
+    "bitcoincash:qzg88rsj40vw6j3zq9tkp2v03xqan2ezfq0wg7xf92",
+    "bitcoincash:qp77rkjfcrw7kjujmk3qfd8a3wjdaycfy5jl70gsl3",
+    "bitcoincash:qqfc86ajrsxv338k4wpfzrmtmvncrxaewy43uvts3f",
+    "bitcoincash:qq995uqg5trfw0yeqvwzu2yx643c5385zgfvqpzyg0",
+};
+
+var sends = sendToaddresses.Select(sta => new Send
+{
+    To = sta,
+    Amount = sendAmount,
+    Currency = Currency.USDollar
+}).ToList();
+
+wallet.SendToMany(sends);
+Display("wallet after send-to-many", wallet);
+
+// send entire balance to sample address
+wallet.SendAll(sampleAddress);
+Display("wallet after send all", wallet);
+
 // get read-only wallet by public address
 var samplePublicAddress = Constants.DevAddress;
 var readOnlyWallet = client.GetWalletByAddress(samplePublicAddress);
