@@ -19,7 +19,7 @@ namespace BitcoinCash.API.Clients
             _key = _configuration["BlockchairAPIKey"] ?? "";
         }
 
-        public List<utxo> GetUtxos(List<string> addresses)
+        public List<utxo>? GetUtxos(List<string> addresses)
         {
             var client = new HttpClient();
 
@@ -38,11 +38,11 @@ namespace BitcoinCash.API.Clients
             }
             catch (Exception)
             {
-                return [];
+                return null;
             }
         }
 
-        public List<string> GetValidTxHashes(List<string> hashes)
+        public List<string>? GetValidTxHashes(List<string> hashes)
         {
             var validTxHashes = new List<string>();
 
@@ -59,7 +59,7 @@ namespace BitcoinCash.API.Clients
                     var response = client.GetAsync($"{_baseUrl}/dashboards/transactions/{hashCsv}?key={_key}").Result;
 
                     if(!response.IsSuccessStatusCode)
-                        return [];
+                        return null;
 
                     var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
@@ -80,7 +80,7 @@ namespace BitcoinCash.API.Clients
             return validTxHashes;
         }
 
-        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
+        public List<KeyValuePair<string, long>>? GetWalletBalances(List<string> addresses)
         {
             var walletBalances = new List<KeyValuePair<string, long>>();
 
@@ -88,7 +88,6 @@ namespace BitcoinCash.API.Clients
             {
                 addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
                 var addressCsv = string.Join(",", addresses);
-
 
                 var stringContent = new FormUrlEncodedContent(
                 [
@@ -99,7 +98,7 @@ namespace BitcoinCash.API.Clients
                 var response = client.PostAsync($"{_baseUrl}/addresses/balances", stringContent).Result;
 
                 if (!response.IsSuccessStatusCode)
-                    return walletBalances;
+                    return null;
 
                 var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 

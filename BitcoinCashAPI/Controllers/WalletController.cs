@@ -1,5 +1,4 @@
 using BitcoinCash.API.Services.Interfaces;
-using BitcoinCash.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BitcoinCash.API.Controllers
@@ -11,20 +10,24 @@ namespace BitcoinCash.API.Controllers
         private readonly IWalletService _walletService = walletService;
 
         [HttpGet]
-        public List<Wallet> Get(string addresses, string currency)
+        public IActionResult Get(string addresses, string currency)
         {
             var addressList = addresses.Split(',').ToList();
 
-            return _walletService.GetWalletInfo(addressList, currency);
+            var wallet = _walletService.GetWalletInfo(addressList, currency);
+
+            return wallet != null ? Ok(wallet) : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         [HttpPost]
         [Route("GetBalances")]
-        public List<KeyValuePair<string, long>> GetBalances([FromForm] string addresses)
+        public IActionResult GetBalances([FromForm] string addresses)
         {
             var addressList = addresses.Split(',').ToList();
 
-            return _walletService.GetWalletBalances(addressList);
+            var balances = _walletService.GetWalletBalances(addressList);
+
+            return balances != null ? Ok(balances) : StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }

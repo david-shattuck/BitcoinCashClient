@@ -75,6 +75,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 - .NET 8 and C# 12
 - Send to many
+- Unambiguous error states
 
 ### 1.4
 

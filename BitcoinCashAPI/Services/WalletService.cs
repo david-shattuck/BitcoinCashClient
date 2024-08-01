@@ -9,13 +9,19 @@ namespace BitcoinCash.API.Services
         private readonly IBlockChairClient _blockChairClient = blockChairClient;
         private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
 
-        public List<Wallet> GetWalletInfo(List<string> addresses, string currency)
+        public List<Wallet>? GetWalletInfo(List<string> addresses, string currency)
         {
             var wallets = addresses.Select(a => new Wallet { PublicAddress = a }).ToList();
 
             var utxos = _blockChairClient.GetUtxos(addresses);
 
+            if (utxos == null)
+                return null;
+
             var bchValue = _coinGeckoClient.GetValue(currency);
+
+            if (bchValue == 0)
+                return null;
 
             wallets.ForEach(w =>
             {
@@ -27,6 +33,6 @@ namespace BitcoinCash.API.Services
             return wallets;
         }
 
-        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses) => _blockChairClient.GetWalletBalances(addresses);
+        public List<KeyValuePair<string, long>>? GetWalletBalances(List<string> addresses) => _blockChairClient.GetWalletBalances(addresses);
     }
 }

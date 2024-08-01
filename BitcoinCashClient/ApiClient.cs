@@ -74,7 +74,10 @@ namespace BitcoinCash.Client
 
             var response = client.GetAsync(url).Result;
 
-            var result = response.Content.ReadAsStringAsync().Result;
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("API returned Error Status");
+
+            var result = response.Content.ReadAsStringAsync().Result;            
 
             return JsonConvert.DeserializeObject<T>(result)!;
         }
@@ -87,7 +90,10 @@ namespace BitcoinCash.Client
 
             var response = client.PostAsync(url, stringContent).Result;
 
-            var result = response.Content.ReadAsStringAsync().Result;
+            if (!response.IsSuccessStatusCode)
+                throw new Exception("API returned Error Status");
+
+            var result = response.Content.ReadAsStringAsync().Result;            
 
             return JsonConvert.DeserializeObject<T>(result)!;
         }

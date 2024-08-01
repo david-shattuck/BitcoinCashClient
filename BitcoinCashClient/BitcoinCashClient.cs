@@ -163,14 +163,7 @@ namespace BitcoinCash
         /// Get the current market value of BCH in the default fiat currency
         /// </summary>
         /// <returns>The current fiat value of BCH</returns>
-        public decimal GetFiatValue()
-        {
-            var fiatValue = ApiClient.GetFiatValue(_defaultCurrency!);
-
-            ValidateFiatValue(fiatValue);
-
-            return fiatValue;
-        } 
+        public decimal GetFiatValue() => ApiClient.GetFiatValue(_defaultCurrency!);
 
         /// <summary>
         /// Get the current market value of BCH in the specified fiat currency
@@ -181,11 +174,7 @@ namespace BitcoinCash
         {
             ValidateFiat(currency);
 
-            var fiatValue = ApiClient.GetFiatValue(currency.Value);
-
-            ValidateFiatValue(fiatValue);
-
-            return fiatValue;
+            return ApiClient.GetFiatValue(currency.Value);
         }
 
         private List<Wallet> FillWalletInfo(List<Wallet> wallets)
@@ -234,12 +223,6 @@ namespace BitcoinCash
             if (currency.Value == Currency.BitcoinCash.Value ||
                 currency.Value == Currency.Satoshis.Value)
                 throw new Exception("BCH cannot be used for fiat value pair");
-        }
-
-        private static void ValidateFiatValue(decimal value)
-        {
-            if (value == 0)
-                throw new Exception("Something went wrong while fetching fiat value of BCH");
         }
     }
 }

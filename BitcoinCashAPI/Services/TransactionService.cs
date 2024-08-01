@@ -7,6 +7,6 @@ namespace BitcoinCash.API.Services
     {
         private readonly IBlockChairClient _blockChairClient = blockChairClient;
 
-        public List<string> GetValidTxHashes(List<string> hashes) => _blockChairClient.GetValidTxHashes(hashes);
+        public List<string>? GetValidTxHashes(List<string> hashes) => _blockChairClient.GetValidTxHashes(hashes);
     }
 }
