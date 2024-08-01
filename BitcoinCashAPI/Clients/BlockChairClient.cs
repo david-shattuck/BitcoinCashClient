@@ -30,11 +30,14 @@ namespace BitcoinCash.API.Clients
             {
                 var response = client.GetAsync($"{_baseUrl}/dashboards/addresses/{addrs}?key={_key}").Result;
 
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                    return [];
+
                 var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
 
                 var utxos = jo?["data"]?["utxo"]?.ToString();
 
-                return JsonConvert.DeserializeObject<List<utxo>>(utxos!) ?? new List<utxo>();
+                return JsonConvert.DeserializeObject<List<utxo>>(utxos!) ?? [];
             }
             catch (Exception)
             {
