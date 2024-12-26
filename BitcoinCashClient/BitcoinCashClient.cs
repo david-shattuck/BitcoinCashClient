@@ -118,7 +118,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="txHashes">The list of transaction hashes to be checked</param>
         /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
-        public static async Task<List<string>> GetValidTxHashes(List<string> txHashes) => await ApiClient.GetValidTxHashes(txHashes);
+        public async Task<List<string>> GetValidTxHashes(List<string> txHashes) => await ApiClient.GetValidTxHashes(txHashes);
 
         /// <summary>
         /// Convert a BCH address in any valid format into CashAddr
