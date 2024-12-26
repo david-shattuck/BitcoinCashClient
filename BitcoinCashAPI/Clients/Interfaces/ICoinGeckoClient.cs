@@ -2,6 +2,6 @@
 {
     public interface ICoinGeckoClient
     {
-        decimal GetValue(string currency = "usd");
+        Task<decimal> GetValue(string currency = "usd");
     }
 }

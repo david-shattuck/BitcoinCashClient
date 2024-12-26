@@ -19,25 +19,27 @@ namespace BitcoinCash.API.Clients
             _key = _configuration["BlockchairAPIKey"] ?? "";
         }
 
-        public List<utxo>? GetUtxos(List<string> addresses)
+        public async Task<List<utxo>?> GetUtxos(List<string> addresses)
         {
-            var client = new HttpClient();
-
+            using var client = new HttpClient();
             addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
             var addrs = string.Join(",", addresses);
 
             try
             {
-                var response = client.GetAsync($"{_baseUrl}/dashboards/addresses/{addrs}?key={_key}").Result;
+                var response = await client.GetAsync($"{_baseUrl}/dashboards/addresses/{addrs}?key={_key}");
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                     return [];
 
-                var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var jo = JObject.Parse(await response.Content.ReadAsStringAsync());
 
                 var utxos = jo?["data"]?["utxo"]?.ToString();
 
-                return JsonConvert.DeserializeObject<List<utxo>>(utxos!) ?? [];
+                return JsonConvert.DeserializeObject<List<utxo>>(utxos!);
             }
             catch (Exception)
             {
@@ -45,7 +47,7 @@ namespace BitcoinCash.API.Clients
             }
         }
 
-        public List<string>? GetValidTxHashes(List<string> hashes)
+        public async Task<List<string>?> GetValidTxHashes(List<string> hashes)
         {
             var validTxHashes = new List<string>();
 
@@ -59,12 +61,12 @@ namespace BitcoinCash.API.Clients
                     var batchHashes = hashes.Skip(i * pageSize).Take(pageSize).ToList();
                     var hashCsv = string.Join(",", batchHashes);
 
-                    var response = client.GetAsync($"{_baseUrl}/dashboards/transactions/{hashCsv}?key={_key}").Result;
+                    var response = await client.GetAsync($"{_baseUrl}/dashboards/transactions/{hashCsv}?key={_key}");
 
                     if(!response.IsSuccessStatusCode)
                         return null;
 
-                    var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    var jo = JObject.Parse(await response.Content.ReadAsStringAsync());
 
                     try
                     {
@@ -83,7 +85,7 @@ namespace BitcoinCash.API.Clients
             return validTxHashes;
         }
 
-        public List<KeyValuePair<string, long>>? GetWalletBalances(List<string> addresses)
+        public async Task<List<KeyValuePair<string, long>>?> GetWalletBalances(List<string> addresses)
         {
             var walletBalances = new List<KeyValuePair<string, long>>();
 
@@ -98,12 +100,12 @@ namespace BitcoinCash.API.Clients
                     new KeyValuePair<string, string>("key", _key)
                 ]);
 
-                var response = client.PostAsync($"{_baseUrl}/addresses/balances", stringContent).Result;
+                var response = await client.PostAsync($"{_baseUrl}/addresses/balances", stringContent);
 
                 if (!response.IsSuccessStatusCode)
                     return null;
 
-                var jo = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                var jo = JObject.Parse(await response.Content.ReadAsStringAsync());
 
                 try
                 {

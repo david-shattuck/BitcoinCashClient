@@ -2,6 +2,6 @@
 {
     public interface IFiatService
     {
-        decimal GetValue(string currency);
+        Task<decimal> GetValue(string currency);
     }
 }

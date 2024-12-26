@@ -11,19 +11,19 @@ namespace BitcoinCash.API.Clients
 
         private readonly IMemoryCache _cache = cache;
 
-        public decimal GetValue(string currency = "usd")
+        public async Task<decimal> GetValue(string currency = "usd")
         {
             if(_cache.TryGetValue(currency, out decimal value))
                 return value;
 
             var client = new HttpClient();
 
-            var response = client.GetAsync($"{_baseUrl}/simple/price?ids=bitcoin-cash&vs_currencies={currency}").Result;
+            var response = await client.GetAsync($"{_baseUrl}/simple/price?ids=bitcoin-cash&vs_currencies={currency}");
 
             if (!response.IsSuccessStatusCode)
                 return 0;
 
-            var json = response.Content.ReadAsStringAsync().Result;
+            var json = await response.Content.ReadAsStringAsync();
 
             dynamic? data = JsonConvert.DeserializeObject(json);
 

@@ -10,22 +10,22 @@ namespace BitcoinCash.API.Controllers
         private readonly IWalletService _walletService = walletService;
 
         [HttpGet]
-        public IActionResult Get(string addresses, string currency)
+        public async Task<IActionResult> Get(string addresses, string currency)
         {
             var addressList = addresses.Split(',').ToList();
 
-            var wallet = _walletService.GetWalletInfo(addressList, currency);
+            var wallets = await _walletService.GetWalletInfo(addressList, currency);
 
-            return wallet != null ? Ok(wallet) : StatusCode(StatusCodes.Status500InternalServerError);
+            return wallets != null ? Ok(wallets) : StatusCode(StatusCodes.Status500InternalServerError);
         }
 
         [HttpPost]
         [Route("GetBalances")]
-        public IActionResult GetBalances([FromForm] string addresses)
+        public async Task<IActionResult> GetBalances([FromForm] string addresses)
         {
             var addressList = addresses.Split(',').ToList();
 
-            var balances = _walletService.GetWalletBalances(addressList);
+            var balances = await _walletService.GetWalletBalances(addressList);
 
             return balances != null ? Ok(balances) : StatusCode(StatusCodes.Status500InternalServerError);
         }

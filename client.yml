@@ -5,7 +5,7 @@ pool:
   vmImage: windows-latest
 
 variables:
-  majorMinorVersion: 1.5
+  majorMinorVersion: 2.0
   semanticVersion: $[counter(variables['majorMinorVersion'], 0)]
   buildConfiguration: "Release"
 

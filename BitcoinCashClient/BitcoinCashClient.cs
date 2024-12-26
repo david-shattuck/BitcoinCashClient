@@ -50,17 +50,14 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="privateKey">Any valid BCH wallet private key</param>
         /// <returns>A live wallet, including its public address, sendable balance, value, and utxos</returns>
-        public Wallet GetWallet(string privateKey)
-        {
-            return GetWallets([privateKey]).First();
-        }
+        public async Task<Wallet> GetWallet(string privateKey) => (await GetWallets([privateKey])).First();
 
         /// <summary>
         /// Get the list of wallets associated with the given private keys
         /// </summary>
         /// <param name="privateKeys">A list of valid BCH wallet private keys</param>
         /// <returns>A list of live wallets, including their public addresses, sendable balances, values, and utxos</returns>
-        public List<Wallet> GetWallets(List<string> privateKeys)
+        public async Task<List<Wallet>> GetWallets(List<string> privateKeys)
         {
             var wallets = new List<Wallet>();
 
@@ -76,7 +73,7 @@ namespace BitcoinCash
                 });
             }
 
-            return FillWalletInfo(wallets);
+            return await FillWalletInfo(wallets);
         }
 
         /// <summary>
@@ -84,24 +81,21 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="address">Any valid BCH public address</param>
         /// <returns>A read-only wallet, including its balance, value, and utxos</returns>
-        public Wallet GetWalletByAddress(string address)
-        {
-            return GetWalletsByAddresses([address]).First();
-        }        
+        public async Task<Wallet> GetWalletByAddress(string address) => (await GetWalletsByAddresses([address])).First();
 
         /// <summary>
         /// Get the wallets associated with the given public addresses
         /// </summary>
         /// <param name="addresses">A list of valid BCH public addresses</param>
         /// <returns>A list of read-only wallets, including their balances, values, and utxos</returns>
-        public List<Wallet> GetWalletsByAddresses(List<string> addresses)
+        public async Task<List<Wallet>> GetWalletsByAddresses(List<string> addresses)
         {
             var wallets = addresses.Select(a => new Wallet
             {
                 PublicAddress = GetCashAddr(a)
             }).ToList();
 
-            return FillWalletInfo(wallets);
+            return await FillWalletInfo(wallets);
         }
 
         /// <summary>
@@ -109,12 +103,12 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="addresses">The list of addresses to be checked</param>
         /// <returns>A list that includes every address that has a non-0 balance along with its associated balance</returns>
-        public List<KeyValuePair<string, long>> GetWalletBalances(List<string> addresses)
+        public async Task<List<KeyValuePair<string, long>>> GetWalletBalances(List<string> addresses)
         {
             if (addresses.Count == 0)
                 return [];
 
-            var balances = ApiClient.GetWalletBalances(addresses);
+            var balances = await ApiClient.GetWalletBalances(addresses);
 
             return balances.Select(b => new KeyValuePair<string, long>(GetCashAddr(b.Key), b.Value)).ToList();
         }
@@ -124,7 +118,7 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="txHashes">The list of transaction hashes to be checked</param>
         /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
-        public List<string> GetValidTxHashes(List<string> txHashes) => ApiClient.GetValidTxHashes(txHashes);
+        public static async Task<List<string>> GetValidTxHashes(List<string> txHashes) => await ApiClient.GetValidTxHashes(txHashes);
 
         /// <summary>
         /// Convert a BCH address in any valid format into CashAddr
@@ -163,25 +157,25 @@ namespace BitcoinCash
         /// Get the current market value of BCH in the default fiat currency
         /// </summary>
         /// <returns>The current fiat value of BCH</returns>
-        public decimal GetFiatValue() => ApiClient.GetFiatValue(_defaultCurrency!);
+        public async Task<decimal> GetFiatValue() => await ApiClient.GetFiatValue(_defaultCurrency!);
 
         /// <summary>
         /// Get the current market value of BCH in the specified fiat currency
         /// </summary>
         /// <param name="currency">A Currency object from BitcoinCash.Models.Currency</param>
         /// <returns>The current fiat value of BCH</returns>
-        public decimal GetFiatValue(Currency currency)
+        public async Task<decimal> GetFiatValue(Currency currency)
         {
             ValidateFiat(currency);
 
-            return ApiClient.GetFiatValue(currency.Value);
+            return await ApiClient.GetFiatValue(currency.Value);
         }
 
-        private List<Wallet> FillWalletInfo(List<Wallet> wallets)
+        private async Task<List<Wallet>> FillWalletInfo(List<Wallet> wallets)
         {
             var addresses = wallets.Select(w => w.PublicAddress).ToList();
 
-            var filledWallets = ApiClient.GetWalletInfo(addresses!, _defaultCurrency!);
+            var filledWallets = await ApiClient.GetWalletInfo(addresses!, _defaultCurrency!);
 
             return wallets.Select(w =>
             {

@@ -7,6 +7,6 @@ namespace BitcoinCash.API.Services
     {
         private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
 
-        public decimal GetValue(string currency) => _coinGeckoClient.GetValue(currency);
+        public async Task<decimal> GetValue(string currency) => await _coinGeckoClient.GetValue(currency);
     }
 }

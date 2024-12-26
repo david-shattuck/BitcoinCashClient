@@ -11,11 +11,11 @@ namespace BitcoinCash.API.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public IActionResult GetValue([FromQuery] string currency)
+        public async Task<IActionResult> GetValue([FromQuery] string currency)
         {
-            var value = _fiatService.GetValue(currency);
+            var value = await _fiatService.GetValue(currency);
 
-            return value > 0 ? Ok(value) : StatusCode(StatusCodes.Status500InternalServerError);            
+            return value > 0 ? Ok(value) : StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
 }

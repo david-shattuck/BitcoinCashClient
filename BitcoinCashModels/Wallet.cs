@@ -53,7 +53,7 @@ namespace BitcoinCash.Models
         /// <param name="sendAmount">The amount to send </param>
         /// <param name="sendCurrency">The currency units of the send amount</param>
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
-        public void Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = true)
+        public async Task Send(string sendTo, decimal sendAmount, Currency sendCurrency, bool donateToDev = true)
         {
             var sends = new List<Send>
             {
@@ -64,7 +64,7 @@ namespace BitcoinCash.Models
                 }
             };
 
-            SendToMany(sends, donateToDev);
+            await SendToMany(sends, donateToDev);
         }        
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace BitcoinCash.Models
         /// </summary>
         /// <param name="sendTo">A valid BCH address - the recipient of this send</param>
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
-        public void SendAll(string sendTo, bool donateToDev = true)
+        public async Task SendAll(string sendTo, bool donateToDev = true)
         {
             _sendAll = true;
 
@@ -81,7 +81,7 @@ namespace BitcoinCash.Models
                 new() { To = sendTo }
             };
 
-            SendToMany(sends, donateToDev);
+            await SendToMany(sends, donateToDev);
         }
 
         /// <summary>
@@ -89,27 +89,27 @@ namespace BitcoinCash.Models
         /// </summary>
         /// <param name="sends">The list of recipient addresses and how much each should receive</param>
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
-        public void SendToMany(List<Send> sends, bool donateToDev = true)
+        public async Task SendToMany(List<Send> sends, bool donateToDev = true)
         {
             _sends = sends;
             _donateToDev = donateToDev;
 
-            BaseSend();
+            await BaseSend();
         }
 
-        private void BaseSend()
+        private async Task BaseSend()
         {
             VerifyUtxos();
             VerifySends();
-            SetBaseFee();
-            SetSendSats();
+            await SetBaseFee();
+            await SetSendSats();
             SetDevDonation();
             SetAddress();
             SetSendUtxos();
             SetTotalFee();
             Create();
             Inputs();
-            Outputs();
+            await Outputs();
             Sign();
             Broadcast();
             Cleanup();
@@ -141,19 +141,19 @@ namespace BitcoinCash.Models
             }
         }
 
-        private void SetBaseFee()
+        private async Task SetBaseFee()
         {
             if (_bchValue == null)
                 throw new Exception("Unable to calculate base fee"); ;
 
             var baseFeeInUSD = (decimal)0.001;
 
-            var bchValueInUSD = GetFiatValue(Currency.USDollar);
+            var bchValueInUSD = await GetFiatValue(Currency.USDollar);
 
             _baseFee = (long)(baseFeeInUSD / bchValueInUSD * Constants.SatoshiMultiplier);
         }
 
-        private void SetSendSats()
+        private async Task SetSendSats()
         {
             if (_sendAll)
             {
@@ -164,7 +164,7 @@ namespace BitcoinCash.Models
             _sendSats = 0;
 
             foreach (var send in _sends!)
-                _sendSats += GetSendSatsAmount(send);
+                _sendSats += await GetSendSatsAmount(send);
         }
 
         private void SetDevDonation()
@@ -243,7 +243,7 @@ namespace BitcoinCash.Models
             }
         }
 
-        private void Outputs()
+        private async Task Outputs()
         {
             var devAddress = BitcoinAddress.Create(Constants.DevAddress, _network);
 
@@ -258,7 +258,7 @@ namespace BitcoinCash.Models
             foreach(var send in _sends!)
             {
                 var toAddress = BitcoinAddress.Create(GetCashAddr(send.To), _network);
-                var toMoney = new Money(_sendAll ? _sendSats : GetSendSatsAmount(send), MoneyUnit.Satoshi);
+                var toMoney = new Money(_sendAll ? _sendSats : await GetSendSatsAmount(send), MoneyUnit.Satoshi);
 
                 _transaction!.Outputs.Add(toMoney, toAddress!.ScriptPubKey);
             }
@@ -320,7 +320,7 @@ namespace BitcoinCash.Models
                     throw new Exception("Improperly formed Send");
         }
 
-        private long GetSendSatsAmount(Send send)
+        private async Task<long> GetSendSatsAmount(Send send)
         {
             if (send.Currency!.Value == Currency.BitcoinCash.Value)
                 return (long)(send.Amount! * Constants.SatoshiMultiplier);            
@@ -331,7 +331,7 @@ namespace BitcoinCash.Models
             if (send.Currency.Value == ValueCurrency)
                 return (long)(send.Amount! / _bchValue! * Constants.SatoshiMultiplier);
             else
-                return (long)(send.Amount! / GetFiatValue(send.Currency) * Constants.SatoshiMultiplier);
+                return (long)(send.Amount! / await GetFiatValue(send.Currency) * Constants.SatoshiMultiplier);
         }
 
         private static string GetCashAddr(string address)
@@ -345,7 +345,7 @@ namespace BitcoinCash.Models
             return string.Concat("bitcoincash:", address);
         }
 
-        private decimal GetFiatValue(Currency currency)
+        private async Task<decimal> GetFiatValue(Currency currency)
         {
             if (ValueCurrency == currency.Value)
                 return (decimal)_bchValue!;
@@ -356,9 +356,9 @@ namespace BitcoinCash.Models
 
             var client = new HttpClient();
 
-            var response = client.GetAsync(url).Result;
+            var response = await client.GetAsync(url);
 
-            var result = response.Content.ReadAsStringAsync().Result;
+            var result = await response.Content.ReadAsStringAsync();
 
             return JsonConvert.DeserializeObject<decimal>(result)!;
         }

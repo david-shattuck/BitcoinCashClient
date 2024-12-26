@@ -2,6 +2,6 @@
 {
     public interface ITransactionService
     {
-        List<string>? GetValidTxHashes(List<string> hashes);
+        Task<List<string>?> GetValidTxHashes(List<string> hashes);
     }
 }

@@ -11,11 +11,11 @@ namespace BitcoinCash.API.Controllers
 
         [HttpGet]
         [Route("GetValidTxHashes")]
-        public IActionResult GetValidTxHashes(string hashes)
+        public async Task<IActionResult> GetValidTxHashes(string hashes)
         {
             var hashList = hashes.Split(',').Distinct().ToList();
 
-            var validHashes = _transactionService.GetValidTxHashes(hashList);
+            var validHashes = await _transactionService.GetValidTxHashes(hashList);
 
             return validHashes != null ? Ok(validHashes) : StatusCode(StatusCodes.Status500InternalServerError);
         }

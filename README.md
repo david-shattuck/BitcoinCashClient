@@ -32,7 +32,7 @@ Use a private key to get a live wallet. This operation retrieves all utxos, calc
 
 ```csharp
 var privateKey = "<your-private-key>";
-var wallet = client.GetWallet(privateKey);
+var wallet = await client.GetWallet(privateKey);
 ```
 
 _Note: Again, the private key is never exposed. The key is used to compute the public address, which is then used to fetch the wallet info from a block explorer._
@@ -43,7 +43,7 @@ Send the specified amount of Bitcoin Cash to the specified address.
 
 ```csharp
 // send one dollar's worth of BCH to the destination address
-wallet.Send("<destination-address>", 1m, Currency.USDollar);
+await wallet.Send("<destination-address>", 1m, Currency.USDollar);
 ```
 
 ### Send All
@@ -51,7 +51,7 @@ wallet.Send("<destination-address>", 1m, Currency.USDollar);
 Send the entire wallet balance to the specified address.
 
 ```csharp
-wallet.SendAll("<destination-address>");
+await wallet.SendAll("<destination-address>");
 ```
 
 ### Get existing read-only wallet
@@ -60,7 +60,7 @@ Use a public address to get a read-only wallet.
 
 ```csharp
 var publicAddress = "<any-valid-bch-address>";
-var wallet = client.GetWalletByAddress(publicAddress);
+var wallet = await client.GetWalletByAddress(publicAddress);
 ```
 
 ## Links
@@ -70,6 +70,10 @@ Please view [the sample project](https://github.com/david-shattuck/BitcoinCashCl
 For a detailed explanation of the code, please see [this tutorial](https://read.cash/@thanah85/bitcoin-cash-payments-using-c-and-net-f1c4b00d).
 
 ## Version History
+
+### 2.0
+
+- Async/Await refactor
 
 ### 1.5
 
