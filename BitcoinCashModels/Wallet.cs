@@ -3,6 +3,7 @@ using NBitcoin.Altcoins;
 using NBitcoin.Protocol;
 using Newtonsoft.Json;
 using SharpCashAddr;
+using System.Net.Sockets;
 
 namespace BitcoinCash.Models
 {
@@ -111,7 +112,7 @@ namespace BitcoinCash.Models
             Inputs();
             await Outputs();
             Sign();
-            Broadcast();
+            await Broadcast();
             Cleanup();
         }
 
@@ -288,17 +289,28 @@ namespace BitcoinCash.Models
             _transaction!.Sign(_secret, coins);
         }
 
-        private void Broadcast()
+        private async Task Broadcast()
         {
-            using var node = Node.Connect(_network, "bch.greyh.at:8333");
+            try
+            {
+                using var node = await Node.ConnectAsync(_network, "bch.greyh.at:8333");
 
-            node.VersionHandshake();
+                node.VersionHandshake();
 
-            node.SendMessage(new InvPayload(InventoryType.MSG_TX, _transaction!.GetHash()));
+                await node.SendMessageAsync(new InvPayload(InventoryType.MSG_TX, _transaction!.GetHash()));
 
-            node.SendMessage(new TxPayload(_transaction));
+                await node.SendMessageAsync(new TxPayload(_transaction));
 
-            Thread.Sleep(500);
+                Thread.Sleep(500);
+            }
+            catch (SocketException ex)
+            {                
+                throw new Exception($"Broadcast SocketException: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Broadcast Exception: {ex.Message}");
+            }
         }
 
         private void VerifyUtxos()
