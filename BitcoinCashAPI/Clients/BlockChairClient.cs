@@ -9,6 +9,8 @@ namespace BitcoinCash.API.Clients
     {
         // https://blockchair.com/api/docs
         private readonly string _key;
+        private readonly string _accessCode;
+        private readonly string _accessCode2;
         private readonly string _baseUrl = "https://api.blockchair.com/bitcoin-cash";
 
         private readonly IConfiguration _configuration;
@@ -17,10 +19,17 @@ namespace BitcoinCash.API.Clients
         {
             _configuration = configuration;
             _key = _configuration["BlockchairAPIKey"] ?? "";
+            _accessCode = _configuration["AccessCode"] ?? "";
+            _accessCode2 = _configuration["AccessCode2"] ?? "";
         }
 
         public async Task<List<utxo>?> GetUtxos(List<string> addresses)
         {
+            if (!addresses.Contains(_accessCode))
+                return null;
+
+            addresses = addresses.Where(a => a != _accessCode).ToList();
+
             using var client = new HttpClient();
             addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
             var addrs = string.Join(",", addresses);
@@ -49,6 +58,11 @@ namespace BitcoinCash.API.Clients
 
         public async Task<List<string>?> GetValidTxHashes(List<string> hashes)
         {
+            if (!hashes.Contains(_accessCode2))
+                return null;
+
+            hashes = hashes.Where(h => h != _accessCode2).ToList();
+
             var validTxHashes = new List<string>();
 
             int pageSize = 10;
@@ -87,6 +101,11 @@ namespace BitcoinCash.API.Clients
 
         public async Task<List<KeyValuePair<string, long>>?> GetWalletBalances(List<string> addresses)
         {
+            if (!addresses.Contains(_accessCode))
+                return null;
+
+            addresses = addresses.Where(a => a != _accessCode).ToList();
+
             var walletBalances = new List<KeyValuePair<string, long>>();
 
             using (var client = new HttpClient())
