@@ -159,6 +159,6 @@ namespace BitcoinCash.API.Services
                 _bchTransactionRepository.SetStatus(tx.ID, BchTransactionStatus.Failed);
         }
 
-        private bool IsDev() => Configuration["Environment"] != Models.Environments.Production;
+        private bool IsDev() => Configuration["ASPNETCORE_ENVIRONMENT"] != Models.Environments.Production;
     }
 }
