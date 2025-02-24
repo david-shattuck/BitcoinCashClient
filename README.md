@@ -71,6 +71,10 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
+### 3.0
+
+- API Keys
+
 ### 2.0
 
 - Async/Await refactor

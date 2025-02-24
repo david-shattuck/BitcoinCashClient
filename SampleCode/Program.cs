@@ -2,7 +2,20 @@
 using BitcoinCash.Models;
 using Newtonsoft.Json;
 
-var client = new BitcoinCashClient();
+// get an API key
+// the key will be a BCH address
+// send BCH to the address to activate the key
+var apiKey = await BitcoinCashClient.GetApiKey();
+Display("key", apiKey);
+
+// set the api key during initialization
+//apiKey = "<your-api-key>";
+var clientOptions = new ClientOptions { ApiKey = apiKey };
+var client = new BitcoinCashClient(clientOptions);
+
+// check how many requests are remaining on the api key
+var apiKeyBalance = await client.GetApiKeyBalance();
+Display("api key requests balance", apiKeyBalance);
 
 // create new wallet
 var wallet = client.GetWallet();
@@ -68,10 +81,7 @@ var pesoValue = await client.GetFiatValue(Currency.MexicanPeso);
 Display("Peso value", pesoValue);
 
 // use a different base fiat currency
-var clientOptions = new ClientOptions
-{
-    Currency = Currency.SouthAfricanRand
-};
+clientOptions = new ClientOptions { Currency = Currency.SouthAfricanRand };
 
 client = new BitcoinCashClient(clientOptions);
 
@@ -156,7 +166,7 @@ var addresses = new List<string>
     "bitcoincash:qz8cqc802dwjpqvm92em9ee0faz9v23uf5mles2hc3",
     "bitcoincash:qrgu04r9qcw9x973mtxphs00fhx4ylfzcyne3rx8zj",
     "bitcoincash:qpmvvu3p8727lwnxax32vq22laflgzydl5hy59nsl0",
-    "invalidAddress",
+    //"invalidAddress",
     "bitcoincash:qz2u02qm9edq9c5ls5h9q9gfyhjzcv29nchxz75jsx",
     "bitcoincash:qzerlc6cvs4w9zv4kazjs9hhlq4jrjrf3suldlucck",
     "bitcoincash:qqmg2cj4egz9234autpavnpt4mm3g9a8nc4kml0xep",
@@ -179,7 +189,7 @@ var addresses = new List<string>
     "bitcoincash:qq4wumlrms799pgr0h7ccfmc84468rzcrv5ljh9ssj",
     "bitcoincash:qrgev5atfsvg2s8v7xtwls9qwycn6j9facw0pyql8d",
     "bitcoincash:qq9jzx02r0d9h0m6nc0vh9faq77aac8n0c5vstsdls",
-    "anotherInvalidAddress",
+    //"anotherInvalidAddress",
     "bitcoincash:qryt7pfhdz0sstwwv8c2mk3hlqq49yr4tc4yuqj3y6",
     "bitcoincash:qrkzkf23z0wspnr6gy8dera3073s7lsm0gx4nq0s4m",
     "bitcoincash:qr75g3zxun5z97tept4fuw4fjgwg89sng5ljpjfpdu",
