@@ -22,8 +22,6 @@ namespace BitcoinCash.API.Services
         private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
         private readonly IBchTransactionService _bchTransactionService = bchTransactionService;
 
-        private readonly decimal _requestCost = 0.0015m;
-
         public string GetKey()
         {
             var wallet = _bitcoinClient.CreateWallet();
@@ -136,8 +134,9 @@ namespace BitcoinCash.API.Services
                 var sats = balance.Value;
 
                 var usdSent = (decimal)sats / 100000000 * bchValue;
+                var requestCost = GetRequestCost(usdSent);
 
-                int requestsPurchased = Convert.ToInt32(usdSent / _requestCost);
+                int requestsPurchased = Convert.ToInt32(usdSent / requestCost);
 
                 _keyRepository.UpdateCalls(address, requestsPurchased);
 
@@ -145,6 +144,32 @@ namespace BitcoinCash.API.Services
             }
 
             await _bchTransactionService.BuyRequests(fundedKeys);
+        }
+
+        private static decimal GetRequestCost(decimal usdSent)
+        {
+            if (usdSent < 10)
+                return 0.0015m;
+
+            if (usdSent < 50)
+                return 0.00145m;
+
+            if (usdSent < 100)
+                return 0.0014m;
+
+            if (usdSent < 500)
+                return 0.00135m;
+
+            if (usdSent < 1000)
+                return 0.0013m;
+
+            if (usdSent < 5000)
+                return 0.00125m;
+
+            if (usdSent < 10000)
+                return 0.0012m;
+
+            return 0.00115m;
         }
 
         private void SaveToCache(string key, object obj)

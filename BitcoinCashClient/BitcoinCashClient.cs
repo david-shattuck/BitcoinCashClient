@@ -30,8 +30,9 @@ namespace BitcoinCash
         /// Generates a new API key. Each key is a BCH address. To activate
         /// the key, send BCH to the address. Then pass in the key as an option when
         /// you instantiate the BCH client. The API will process your requests until the
-        /// funds you sent run out. Each request costs $0.0015. You can send more BCH
-        /// to the address/key at any time to buy additional requests.
+        /// funds you sent run out. You can send more BCH to the address/key at any time
+        /// to buy additional requests. The cost per request starts at $0.0015 but decreases
+        /// if purchased in bulk.
         /// </summary>
         /// <returns>A public BCH address which is also your API key</returns>
         public static async Task<string> GetApiKey() => await ApiClient.GetApiKey();
