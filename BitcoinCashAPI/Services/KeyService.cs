@@ -126,6 +126,10 @@ namespace BitcoinCash.API.Services
                 return;
 
             var bchValue = await _coinGeckoClient.GetValue();
+
+            if (bchValue == 0)
+                return;
+
             List<Key> fundedKeys = [];
 
             foreach (var balance in balances)
