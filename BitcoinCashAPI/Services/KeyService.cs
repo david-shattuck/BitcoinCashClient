@@ -130,6 +130,9 @@ namespace BitcoinCash.API.Services
             if (bchValue == 0)
                 return;
 
+            if (!_cache.TryGetValue(CacheKeys.InvalidAddresses, out List<string>? invalidAddresses))
+                invalidAddresses = [];
+
             List<Key> fundedKeys = [];
 
             foreach (var balance in balances)
@@ -144,8 +147,12 @@ namespace BitcoinCash.API.Services
 
                 _keyRepository.UpdateCalls(address, requestsPurchased);
 
+                invalidAddresses?.Remove(address);
+
                 fundedKeys.Add(activeKeys.First(ak => ak.Address == address));
             }
+
+            SaveToCache(CacheKeys.InvalidAddresses, invalidAddresses ?? []);
 
             await _bchTransactionService.BuyRequests(fundedKeys);
         }
