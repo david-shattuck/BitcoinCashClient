@@ -51,7 +51,7 @@ namespace BitcoinCash.API.Services
                 remainingCalls = null;
                 SaveToCache(cacheKey, remainingCalls!);
                 return remainingCalls;
-            }                
+            }
 
             var key = _keyRepository.Get(address);
 
@@ -100,7 +100,7 @@ namespace BitcoinCash.API.Services
 
             keyCreateAttempts.Add(DateTime.UtcNow);
 
-            var newUnlockTime = DateTime.UtcNow.AddSeconds(keyCreateAttempts.Count);
+            var newUnlockTime = DateTime.UtcNow.AddMinutes(keyCreateAttempts.Count);
 
             SaveToCache(CacheKeys.UnlockTime, newUnlockTime);
             SaveToCache(CacheKeys.RecentAttempts, keyCreateAttempts);
