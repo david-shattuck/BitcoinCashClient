@@ -36,5 +36,12 @@ namespace BitcoinCash.API.DAL.Repositories
             key.LastActivity = DateTime.UtcNow;
             _dbContext.SaveChanges();
         }
+
+        public void PurgeIdle()
+        {
+            var idleKeys = _dbContext.Key.Where(k => k.RemainingCalls == 0 && k.LastActivity < DateTime.UtcNow.AddMonths(-1)).ToList();
+            _dbContext.Key.RemoveRange(idleKeys);
+            _dbContext.SaveChanges();
+        }
     }
 }

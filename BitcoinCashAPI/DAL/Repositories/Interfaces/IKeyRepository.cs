@@ -8,5 +8,6 @@ namespace BitcoinCash.API.DAL.Repositories.Interfaces
         public Key? Get(string address);
         void Add(Key key);
         void UpdateCalls(string address, int change);
+        void PurgeIdle();
     }
 }

@@ -118,6 +118,8 @@ namespace BitcoinCash.API.Services
 
             SaveToCache(CacheKeys.NextPaymentCheck, DateTime.UtcNow.AddHours(1));
 
+            _keyRepository.PurgeIdle();
+
             var activeKeys = _keyRepository.GetActive();
 
             var balances = await _bchTransactionService.GetFundedKeyBalances(activeKeys);
