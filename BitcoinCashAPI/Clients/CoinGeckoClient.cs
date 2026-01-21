@@ -4,12 +4,21 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BitcoinCash.API.Clients
 {
-    public class CoinGeckoClient(IMemoryCache cache) : ICoinGeckoClient
+    public class CoinGeckoClient : ICoinGeckoClient
     {
         // https://www.coingecko.com/en/api/documentation
+        private readonly string _key;
         private readonly string _baseUrl = "https://api.coingecko.com/api/v3";
 
-        private readonly IMemoryCache _cache = cache;
+        private readonly IMemoryCache _cache;
+        private readonly IConfiguration _configuration;
+
+        public CoinGeckoClient(IMemoryCache cache, IConfiguration configuration)
+        {
+            _cache = cache;
+            _configuration = configuration;
+            _key = _configuration["CoinGeckoAPIKey"] ?? "";
+        }
 
         public async Task<decimal> GetValue(string currency = "usd")
         {
@@ -18,7 +27,9 @@ namespace BitcoinCash.API.Clients
 
             var client = new HttpClient();
 
-            var response = await client.GetAsync($"{_baseUrl}/simple/price?ids=bitcoin-cash&vs_currencies={currency}");
+            var url = $"{_baseUrl}/simple/price?ids=bitcoin-cash&vs_currencies={currency}&x_cg_demo_api_key={_key}";
+
+            var response = await client.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
                 return 0;
