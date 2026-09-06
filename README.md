@@ -73,6 +73,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ### 3.1
 
+- .NET 10 and C# 14
 - API Secrets
 
 ### 3.0

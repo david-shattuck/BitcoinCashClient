@@ -1,14 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NBitcoin.Altcoins" Version="3.0.24" />
+    <PackageReference Include="NBitcoin.Altcoins" Version="6.0.4" />
     <PackageReference Include="SharpCashAddr" Version="1.0.0" />
   </ItemGroup>
 

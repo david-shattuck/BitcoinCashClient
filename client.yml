@@ -14,7 +14,7 @@ name: $(majorMinorVersion).$(semanticVersion)
 steps:
   - task: UseDotNet@2
     inputs:
-      version: "8.x"
+      version: "10.x"
 
   - task: DotNetCoreCLI@2
     inputs:
