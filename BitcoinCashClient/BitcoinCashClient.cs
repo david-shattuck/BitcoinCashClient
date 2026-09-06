@@ -27,26 +27,26 @@ namespace BitcoinCash
         public BitcoinCashClient(ClientOptions options) => SetOptions(options);
 
         /// <summary>
-        /// Generates a new API key. Each key is a BCH address. To activate
-        /// the key, send BCH to the address. Then pass in the key as an option when
+        /// Generates a new API key. Each key has a BCH address. To activate
+        /// the key, send BCH to the address. Then pass in the secret as an option when
         /// you instantiate the BCH client. The API will process your requests until the
-        /// funds you sent run out. You can send more BCH to the address/key at any time
+        /// funds you sent run out. You can send more BCH to the address at any time
         /// to buy additional requests. The cost per request starts at $0.0015 but decreases
         /// if purchased in bulk.
         /// </summary>
-        /// <returns>A public BCH address which is also your API key</returns>
-        public static async Task<string> GetApiKey() => await ApiClient.GetApiKey();
+        /// <returns>A newly created API key</returns>
+        public static async Task<ApiKey> GetApiKey() => await ApiClient.GetApiKey();
 
         /// <summary>
-        /// Get the number of requests available on the currently-loaded API key
+        /// Get info about the currently-loaded API key
         /// </summary>
-        /// <returns>The number of requests remaining before refill</returns>
-        public async Task<int> GetApiKeyBalance()
+        /// <returns>Information about the API key</returns>
+        public async Task<ApiKey> GetApiKeyInfo()
         {
             if (!IsApiKeySet())
-                return 0;
-            
-            return await ApiClient.GetApiKeyBalance(_apiKey!);
+                throw new Exception("API Key Not set. Call GetApiKey() to get one and instantiate the client with it.");
+
+            return await ApiClient.GetApiKeyInfo(_apiKey!);
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace BitcoinCash
 
             var filledWallets = await ApiClient.GetWalletInfo(addresses!, _defaultCurrency!, _apiKey!);
 
-            return wallets.Select(w =>
+            return [.. wallets.Select(w =>
             {
                 var filledWallet = filledWallets.FirstOrDefault(fw => fw.PublicAddress == w.PublicAddress);
                 if (filledWallet == null)
@@ -225,7 +225,7 @@ namespace BitcoinCash
                 filledWallet.PrivateKey = w.PrivateKey;
 
                 return filledWallet;
-            }).ToList();
+            })];
         }
 
         private bool IsApiKeySet() => !string.IsNullOrWhiteSpace(_apiKey);
@@ -254,9 +254,6 @@ namespace BitcoinCash
         {
             if (options.Currency != null)
                 ValidateFiat(options.Currency);
-
-            if (!string.IsNullOrWhiteSpace(options.ApiKey))
-                ValidateKey(options.ApiKey);
         }
 
         private static void ValidateFiat(Currency currency)
@@ -264,12 +261,6 @@ namespace BitcoinCash
             if (currency.Value == Currency.BitcoinCash.Value ||
                 currency.Value == Currency.Satoshis.Value)
                 throw new Exception("BCH cannot be used for fiat value pair");
-        }
-
-        private void ValidateKey(string apiKey)
-        {
-            if (!IsAddressValid(apiKey))
-                throw new Exception("The API Key should be a valid BCH address received from the API itself. Call GetApiKey() to get one.");
         }
     }
 }

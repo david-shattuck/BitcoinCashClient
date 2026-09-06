@@ -8,6 +8,7 @@ namespace BitcoinCash.API.Models.DatabaseModels
         public int ID { get; set; }
         public required string PrivateKey { get; set; }
         public required string Address { get; set; }
+        public required string Secret { get; set; }
         public int RemainingCalls { get; set; }
         public DateTime LastActivity { get; set; }
     }

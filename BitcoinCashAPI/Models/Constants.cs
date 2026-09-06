@@ -8,7 +8,7 @@ namespace BitcoinCash.API.Models
         public const string BchPrice = "BchPrice";
         public const string UnlockTime = "UnlockTime";
         public const string NextPaymentCheck = "NextPaymentCheck";
-        public const string InvalidAddresses = "InvalidAddresses";
+        public const string InvalidSecrets = "InvalidSecrets";
         public const string RecentAttempts = "RecentKeyCreationAttempts";
     }
 

@@ -10,9 +10,9 @@ namespace BitcoinCash.API.DAL.Repositories
 
         public List<Key> GetActive() => [.. _dbContext.Key.Where(k => k.LastActivity >= DateTime.UtcNow.AddMonths(-1))];
 
-        public Key? Get(string address)
+        public Key? Get(string secret)
         {
-            var key = _dbContext.Key.FirstOrDefault(k => k.Address == address);
+            var key = _dbContext.Key.FirstOrDefault(k => k.Secret == secret);
 
             if (key == null) return key;
 
@@ -28,7 +28,16 @@ namespace BitcoinCash.API.DAL.Repositories
             _dbContext.SaveChanges();
         }
 
-        public void UpdateCalls(string address, int change)
+        public void UpdateCallsBySecret(string secret, int change)
+        {
+            var key = _dbContext.Key.Single(k => k.Secret == secret);
+
+            key.RemainingCalls += change;
+            key.LastActivity = DateTime.UtcNow;
+            _dbContext.SaveChanges();
+        }
+
+        public void UpdateCallsByAddress(string address, int change)
         {
             var key = _dbContext.Key.Single(k => k.Address == address);
 

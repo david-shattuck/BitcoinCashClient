@@ -11,25 +11,24 @@ namespace BitcoinCash.Client
         /// <summary>
         /// Get a new API key
         /// </summary>
-        /// <returns>A public BCH address which is also an API key</returns>
-        public static async Task<string> GetApiKey()
+        /// <returns>A newly created API key with a secret value and payment address</returns>
+        public static async Task<ApiKey> GetApiKey()
         {
             var url = $"{Constants.ApiUrl}/key";
 
-            return await GetStringFromApi<string>(url);
+            return await GetFromApi<ApiKey>(url);
         }
 
         /// <summary>
-        /// Get the number of requests remaining on an API Key before it 
-        /// needs to be refilled
+        /// Get info about an API key
         /// </summary>
-        /// <param name="key">The API key to be checked</param>
-        /// <returns>How many more calls can be made using this API key without refilling it</returns>
-        public static async Task<int> GetApiKeyBalance(string key)
+        /// <param name="secret">The secret of the API key to be checked</param>
+        /// <returns>Information about the API key</returns>
+        public static async Task<ApiKey> GetApiKeyInfo(string secret)
         {
-            var url = $"{Constants.ApiUrl}/key/remainingcount?key={key}";
+            var url = $"{Constants.ApiUrl}/key/info?secret={secret}";
 
-            return await GetFromApi<int>(url);
+            return await GetFromApi<ApiKey>(url);
         }
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace BitcoinCash.Client
         /// </summary>
         /// <param name="addresses">Public addresses of wallets to lookup</param>
         /// <param name="currency">Fiat currency to denominate wallet value</param>
-        /// <param name="key">The api key, a funded BCH address</param>
+        /// <param name="key">The api key secret</param>
         /// <returns>A list of wallets with utxos and value populated</returns>
         public static async Task<List<Wallet>> GetWalletInfo(List<string> addresses, string currency, string key)
         {
@@ -52,7 +51,7 @@ namespace BitcoinCash.Client
         /// Get current balances of specified wallets
         /// </summary>
         /// <param name="addresses">Public addresses of wallets to lookup</param>
-        /// <param name="key">The api key, a funded BCH address</param>
+        /// <param name="key">The api key secret</param>
         /// <returns>A list of addresses with their current balances. Empty wallets will not be included.</returns>
         public static async Task<List<KeyValuePair<string, long>>> GetWalletBalances(List<string> addresses, string key)
         {
@@ -72,7 +71,7 @@ namespace BitcoinCash.Client
         /// Get the list of tx hashes from provided list that exist in the blockchain or mempool
         /// </summary>
         /// <param name="hashes">The list of transaction hashes to be checked</param>
-        /// <param name="key">The api key, a funded BCH address</param>
+        /// <param name="key">The api key secret</param>
         /// <returns>A list of transaction hashes that exist in the blockchain or mempool</returns>
         public static async Task<List<string>> GetValidTxHashes(List<string> hashes, string key)
         {

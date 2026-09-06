@@ -30,7 +30,7 @@ namespace BitcoinCash.API.Clients
 
         public async Task<List<Wallet>> GetWallets(List<string> keys) => await _bitcoinCashClient.GetWallets(keys);
 
-        public async Task<List<KeyValuePair<string, long>>> GetWalletBalances(List<string> addresses, bool getNullOnError = false)
+        public async Task<List<KeyValuePair<string, long>>?> GetWalletBalances(List<string> addresses, bool getNullOnError = false)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace BitcoinCash.API.Clients
             }
         } 
 
-        public async Task<List<Wallet>> GetWalletsByAddresses(List<string> addresses)
+        public async Task<List<Wallet>?> GetWalletsByAddresses(List<string> addresses)
         {
             try
             {

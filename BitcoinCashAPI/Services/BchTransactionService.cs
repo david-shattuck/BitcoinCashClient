@@ -38,6 +38,9 @@ namespace BitcoinCash.API.Services
 
             var fundedWallets = await _bitcoinClient.GetWalletsByAddresses(fundedAddresses);
 
+            if (fundedWallets == null || fundedWallets.Count == 0)
+                return [];
+
             var bchPrice = await _bitcoinClient.GetValue();
             var bchTxs = _bchTransactionRepository.GetBchTransactions(BchTransactionTypes.FundKey);
 

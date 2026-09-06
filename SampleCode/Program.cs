@@ -3,19 +3,19 @@ using BitcoinCash.Models;
 using Newtonsoft.Json;
 
 // get an API key
-// the key will be a BCH address
+// the key will have a BCH address
 // send BCH to the address to activate the key
 var apiKey = await BitcoinCashClient.GetApiKey();
 Display("key", apiKey);
 
 // set the api key during initialization
 //apiKey = "<your-api-key>";
-var clientOptions = new ClientOptions { ApiKey = apiKey };
+var clientOptions = new ClientOptions { ApiKey = apiKey.Secret };
 var client = new BitcoinCashClient(clientOptions);
 
-// check how many requests are remaining on the api key
-var apiKeyBalance = await client.GetApiKeyBalance();
-Display("api key requests balance", apiKeyBalance);
+// get key payment address and remaining calls
+var apiKeyInfo = await client.GetApiKeyInfo();
+Display("api key info", apiKeyInfo);
 
 // create new wallet
 var wallet = client.GetWallet();

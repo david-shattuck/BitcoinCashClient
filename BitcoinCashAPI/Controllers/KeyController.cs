@@ -12,24 +12,37 @@ namespace BitcoinCash.API.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            if (!_keyService.CanGetKey())
+            if (!_keyService.CanGet())
                 return StatusCode(StatusCodes.Status429TooManyRequests);
 
-            var key = _keyService.GetKey();
+            var key = _keyService.Get();
 
-            return !string.IsNullOrWhiteSpace(key) ? Ok(key) : StatusCode(StatusCodes.Status500InternalServerError);
+            return Ok(new
+            {
+                key.Secret,
+                key.Address,
+                key.RemainingCalls
+            });
         }
 
         [HttpGet]
-        [Route("RemainingCount")]
-        public IActionResult GetRemainingRequestCount(string key)
+        [Route("Info")]
+        public IActionResult GetInfo(string secret)
         {
-            var requestsCount = _keyService.GetCalls(key);
+            if (!_keyService.CanGet())
+                return StatusCode(StatusCodes.Status429TooManyRequests);
 
-            if (requestsCount == null)
+            var key = _keyService.Get(secret);
+
+            if (key == null)
                 return StatusCode(StatusCodes.Status404NotFound);
 
-            return Ok(requestsCount);
+            return Ok(new
+            {
+                key.Secret,
+                key.Address,
+                key.RemainingCalls
+            });
         }
     }
 }

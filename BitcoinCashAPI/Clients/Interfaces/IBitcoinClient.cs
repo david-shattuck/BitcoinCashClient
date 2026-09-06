@@ -7,8 +7,8 @@ namespace BitcoinCash.API.Clients.Interfaces
         Wallet CreateWallet();
         Task<Wallet> GetWallet(string key);
         Task<List<Wallet>> GetWallets(List<string> keys);
-        Task<List<Wallet>> GetWalletsByAddresses(List<string> addresses);
-        Task<List<KeyValuePair<string, long>>> GetWalletBalances(List<string> addresses, bool getNullOnError = false);
+        Task<List<Wallet>?> GetWalletsByAddresses(List<string> addresses);
+        Task<List<KeyValuePair<string, long>>?> GetWalletBalances(List<string> addresses, bool getNullOnError = false);
         Task<List<string>> GetValidTxHashes(List<string> txHashes);
         Task<decimal> GetValue();
         Task<long> GetValueInSats(int usd);

@@ -22,7 +22,7 @@ namespace BitcoinCash.API.Services
         private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
         private readonly IBchTransactionService _bchTransactionService = bchTransactionService;
 
-        public string GetKey()
+        public Key Get()
         {
             var wallet = _bitcoinClient.CreateWallet();
             var encryptedKey = _cipher.Encrypt(wallet.PrivateKey!);
@@ -31,64 +31,40 @@ namespace BitcoinCash.API.Services
             {
                 PrivateKey = encryptedKey,
                 Address = wallet.PublicAddress!,
+                Secret = Guid.NewGuid().ToString(),
                 RemainingCalls = 0,
                 LastActivity = DateTime.UtcNow
             };
 
             _keyRepository.Add(key);
 
-            return wallet.PublicAddress!;
+            return key;
         }
 
-        public int? GetCalls(string address)
+        public Key? Get(string secret) => _keyRepository.Get(secret);
+
+        public bool IsValid(string secret)
         {
-            var cacheKey = $"RemainingCalls-{address}";
-            if (_cache.TryGetValue(cacheKey, out int? remainingCalls))
-                return remainingCalls;
+            if (!_cache.TryGetValue(CacheKeys.InvalidSecrets, out List<string>? invalidSecrets))
+                invalidSecrets = [];
 
-            if (!_bitcoinClient.IsAddressValid(address))
-            {
-                remainingCalls = null;
-                SaveToCache(cacheKey, remainingCalls!);
-                return remainingCalls;
-            }
-
-            var key = _keyRepository.Get(address);
-
-            if (key == null)
-                remainingCalls = null;
-            else
-                remainingCalls = key.RemainingCalls;
-
-            SaveToCache(cacheKey, remainingCalls!);
-            return remainingCalls;
-        }
-
-        public bool IsValid(string address)
-        {
-            if (!_cache.TryGetValue(CacheKeys.InvalidAddresses, out List<string>? invalidAddresses))
-                invalidAddresses = [];
-
-            if (invalidAddresses!.Contains(address))
+            if (invalidSecrets!.Contains(secret))
                 return false;
 
-            if (!_bitcoinClient.IsAddressValid(address))
-                return false;
-
-            var key = _keyRepository.Get(address);
+            var key = _keyRepository.Get(secret);
 
             if (key == null || key.RemainingCalls <= 0)
             {
-                invalidAddresses!.Add(address);
-                SaveToCache(CacheKeys.InvalidAddresses, invalidAddresses);
+                invalidSecrets!.Add(secret);
+                SaveToCache(CacheKeys.InvalidSecrets, invalidSecrets);
                 return false;
             }
 
-            _keyRepository.UpdateCalls(address, -1);
+            _keyRepository.UpdateCallsBySecret(secret, -1);
             return true;
         }
 
-        public bool CanGetKey()
+        public bool CanGet()
         {
             if (!_cache.TryGetValue(CacheKeys.UnlockTime, out DateTime unlockTime))
                 unlockTime = DateTime.UtcNow.AddMinutes(-1);
@@ -100,7 +76,7 @@ namespace BitcoinCash.API.Services
 
             keyCreateAttempts.Add(DateTime.UtcNow);
 
-            var newUnlockTime = DateTime.UtcNow.AddMinutes(keyCreateAttempts.Count);
+            var newUnlockTime = DateTime.UtcNow.AddMinutes(keyCreateAttempts.Count - 10);
 
             SaveToCache(CacheKeys.UnlockTime, newUnlockTime);
             SaveToCache(CacheKeys.RecentAttempts, keyCreateAttempts);
@@ -132,9 +108,6 @@ namespace BitcoinCash.API.Services
             if (bchValue == 0)
                 return;
 
-            if (!_cache.TryGetValue(CacheKeys.InvalidAddresses, out List<string>? invalidAddresses))
-                invalidAddresses = [];
-
             List<Key> fundedKeys = [];
 
             foreach (var balance in balances)
@@ -147,14 +120,12 @@ namespace BitcoinCash.API.Services
 
                 int requestsPurchased = Convert.ToInt32(usdSent / requestCost);
 
-                _keyRepository.UpdateCalls(address, requestsPurchased);
-
-                invalidAddresses?.Remove(address);
+                _keyRepository.UpdateCallsByAddress(address, requestsPurchased);
 
                 fundedKeys.Add(activeKeys.First(ak => ak.Address == address));
             }
 
-            SaveToCache(CacheKeys.InvalidAddresses, invalidAddresses ?? []);
+            SaveToCache(CacheKeys.InvalidSecrets, new List<string>());
 
             await _bchTransactionService.BuyRequests(fundedKeys);
         }
@@ -185,11 +156,11 @@ namespace BitcoinCash.API.Services
             return 0.00115m;
         }
 
-        private void SaveToCache(string key, object obj)
+        private void SaveToCache(string key, object? obj)
         {
             _cache.Set(key, obj, new MemoryCacheEntryOptions
             {
-                AbsoluteExpiration = DateTime.UtcNow.AddHours(1)
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
             });
         }
     }
