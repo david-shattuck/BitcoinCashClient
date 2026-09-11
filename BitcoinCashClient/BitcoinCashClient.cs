@@ -1,7 +1,6 @@
 ﻿using BitcoinCash.Client;
+using BitcoinCash.Core;
 using BitcoinCash.Models;
-using NBitcoin;
-using NBitcoin.Altcoins;
 using SharpCashAddr;
 
 namespace BitcoinCash
@@ -13,7 +12,7 @@ namespace BitcoinCash
     {
         private string? _defaultCurrency;
         private string? _apiKey;
-        private readonly Network _network = BCash.Instance.Mainnet;        
+        private readonly Network _network = Networks.Mainnet;        
 
         /// <summary>
         /// Instantiate BchClient with default options

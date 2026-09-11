@@ -1,6 +1,5 @@
-﻿using NBitcoin;
-using NBitcoin.Altcoins;
-using NBitcoin.Protocol;
+﻿using BitcoinCash.Core;
+using BitcoinCash.Core.Protocol;
 using Newtonsoft.Json;
 using SharpCashAddr;
 using System.Net.Sockets;
@@ -129,7 +128,7 @@ namespace BitcoinCash.Models
         private List<Send>? _sends;
         private Transaction? _transaction;
 
-        private readonly Network _network = BCash.Instance.Mainnet;
+        private readonly Network _network = Networks.Mainnet;
 
         private decimal? _bchValue
         {
@@ -280,7 +279,7 @@ namespace BitcoinCash.Models
 
             foreach (var utxo in _utxos!)
             {
-                var txInId = uint256.Parse(utxo.transaction_hash);
+                var txInId = uint256.Parse(utxo.transaction_hash!);
                 var txAmount = new Money(utxo.value, MoneyUnit.Satoshi);
                 var inCoin = new Coin(txInId, utxo.index, txAmount, _address!.ScriptPubKey);
                 coins.Add(inCoin);

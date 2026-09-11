@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinCash.API", "BitcoinC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinCash.Models", "BitcoinCashModels\BitcoinCash.Models.csproj", "{4DADFCF9-85CE-4114-837F-99F783004EA2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BitcoinCash.Core", "BitcoinCashCore\BitcoinCash.Core.csproj", "{AD4591ED-CDCD-43AC-9B36-C7DC1F3FD5AD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{4DADFCF9-85CE-4114-837F-99F783004EA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DADFCF9-85CE-4114-837F-99F783004EA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DADFCF9-85CE-4114-837F-99F783004EA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD4591ED-CDCD-43AC-9B36-C7DC1F3FD5AD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD4591ED-CDCD-43AC-9B36-C7DC1F3FD5AD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD4591ED-CDCD-43AC-9B36-C7DC1F3FD5AD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD4591ED-CDCD-43AC-9B36-C7DC1F3FD5AD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

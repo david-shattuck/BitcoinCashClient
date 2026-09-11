@@ -5,15 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <RootNamespace>BitcoinCash.Core</RootNamespace>
+    <AssemblyName>BitcoinCash.Core</AssemblyName>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="SharpCashAddr" Version="1.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\BitcoinCashCore\BitcoinCash.Core.csproj" />
-  </ItemGroup>
 
 </Project>

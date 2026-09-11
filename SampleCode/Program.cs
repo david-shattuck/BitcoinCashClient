@@ -9,7 +9,6 @@ var apiKey = await BitcoinCashClient.GetApiKey();
 Display("key", apiKey);
 
 // set the api key during initialization
-//apiKey = "<your-api-key>";
 var clientOptions = new ClientOptions { ApiKey = apiKey.Secret };
 var client = new BitcoinCashClient(clientOptions);
 

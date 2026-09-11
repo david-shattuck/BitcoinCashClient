@@ -10,12 +10,21 @@ Private keys are never exposed. [Don't trust. Verify.](https://github.com/david-
 
 ## How to Use
 
-### Instantiate
+### Get a Key
 
 ```csharp
 using BitcoinCash;
 
-var client = new BitcoinCashClient();
+var apiKey = await BitcoinCashClient.GetApiKey();
+```
+
+_Send BCH to apiKey.Address to fund the key. $0.0015 per request._
+
+### Instantiate
+
+```csharp
+var clientOptions = new ClientOptions { ApiKey = apiKey.Secret };
+var client = new BitcoinCashClient(clientOptions);
 ```
 
 ### Create new wallet
@@ -75,6 +84,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 - .NET 10 and C# 14
 - API Secrets
+- Remove NBitcoin dependency
 
 ### 3.0
 
