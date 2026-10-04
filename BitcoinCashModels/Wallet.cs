@@ -22,6 +22,11 @@ namespace BitcoinCash.Models
         public string? PublicAddress { get; set; }
 
         /// <summary>
+        /// The token-aware form of the public address, for receiving CashTokens
+        /// </summary>
+        public string? TokenAddress { get; set; }
+
+        /// <summary>
         /// The number of satoshis held in this wallet
         /// </summary>
         public long? Balance => utxos?.Sum(u => u.value);

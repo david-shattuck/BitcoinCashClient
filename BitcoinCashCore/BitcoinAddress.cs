@@ -10,7 +10,13 @@ namespace BitcoinCash.Core
         /// <summary>
         /// A pay to public key hash output
         /// </summary>
-        Legacy
+        Legacy,
+
+        /// <summary>
+        /// A pay to public key hash output, addressed in the token-aware form that signals
+        /// the wallet can receive CashTokens
+        /// </summary>
+        TokenAware
     }
 
     /// <summary>

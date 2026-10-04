@@ -13,7 +13,17 @@ namespace BitcoinCash.Core.DataEncoders
         /// <summary>
         /// The hash of a redeem script
         /// </summary>
-        P2SH = 8
+        P2SH = 8,
+
+        /// <summary>
+        /// The hash of a public key, signalling a wallet that can receive CashTokens
+        /// </summary>
+        TokenP2PKH = 16,
+
+        /// <summary>
+        /// The hash of a redeem script, signalling a contract that can receive CashTokens
+        /// </summary>
+        TokenP2SH = 24
     }
 
     /// <summary>
@@ -86,6 +96,8 @@ namespace BitcoinCash.Core.DataEncoders
         {
             0 => CashAddrType.P2PKH,
             8 => CashAddrType.P2SH,
+            16 => CashAddrType.TokenP2PKH,
+            24 => CashAddrType.TokenP2SH,
             _ => throw new FormatException($"Invalid address type in version byte: {versionByte}")
         };
 

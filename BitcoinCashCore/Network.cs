@@ -84,12 +84,56 @@ namespace BitcoinCash.Core
             new(CashAddr.Encode(CashAddrPrefix, CashAddrType.P2PKH, keyId.Hash), keyId, this);
 
         /// <summary>
+        /// Build the token-aware address that pays to the holder of the given public key hash.
+        /// It pays to the same script as the P2PKH address but tells senders the wallet can receive CashTokens
+        /// </summary>
+        /// <param name="keyId">The public key hash</param>
+        /// <returns>A token-aware CashAddr address</returns>
+        public BitcoinPubKeyAddress CreateTokenP2PKHAddress(KeyId keyId) =>
+            new(CashAddr.Encode(CashAddrPrefix, CashAddrType.TokenP2PKH, keyId.Hash), keyId, this);
+
+        /// <summary>
         /// Build the address that pays to the given script hash
         /// </summary>
         /// <param name="scriptId">The script hash</param>
         /// <returns>A CashAddr address</returns>
         public BitcoinScriptAddress CreateP2SHAddress(ScriptId scriptId) =>
             new(CashAddr.Encode(CashAddrPrefix, CashAddrType.P2SH, scriptId.Hash), scriptId, this);
+
+        /// <summary>
+        /// Build the token-aware address that pays to the given script hash
+        /// </summary>
+        /// <param name="scriptId">The script hash</param>
+        /// <returns>A token-aware CashAddr address</returns>
+        public BitcoinScriptAddress CreateTokenP2SHAddress(ScriptId scriptId) =>
+            new(CashAddr.Encode(CashAddrPrefix, CashAddrType.TokenP2SH, scriptId.Hash), scriptId, this);
+
+        /// <summary>
+        /// Derive the token-aware form of an address. Both forms commit to the same hash,
+        /// so no private key is needed
+        /// </summary>
+        /// <param name="address">An address in any form accepted by <see cref="ParseAddress"/></param>
+        /// <returns>The token-aware CashAddr address</returns>
+        /// <exception cref="FormatException">The address is not valid on this network</exception>
+        public BitcoinAddress GetTokenAddress(string address) => ParseAddress(address) switch
+        {
+            BitcoinPubKeyAddress pubKeyAddress => CreateTokenP2PKHAddress(pubKeyAddress.KeyId),
+            BitcoinScriptAddress scriptAddress => CreateTokenP2SHAddress(scriptAddress.ScriptId),
+            var other => throw new FormatException($"Unsupported address {other}")
+        };
+
+        /// <summary>
+        /// Derive the standard, non-token-aware form of an address
+        /// </summary>
+        /// <param name="address">An address in any form accepted by <see cref="ParseAddress"/></param>
+        /// <returns>The standard CashAddr address</returns>
+        /// <exception cref="FormatException">The address is not valid on this network</exception>
+        public BitcoinAddress GetStandardAddress(string address) => ParseAddress(address) switch
+        {
+            BitcoinPubKeyAddress pubKeyAddress => CreateP2PKHAddress(pubKeyAddress.KeyId),
+            BitcoinScriptAddress scriptAddress => CreateP2SHAddress(scriptAddress.ScriptId),
+            var other => throw new FormatException($"Unsupported address {other}")
+        };
 
         /// <summary>
         /// Parse an address in either the CashAddr or the legacy Base58Check form
@@ -103,7 +147,7 @@ namespace BitcoinCash.Core
             {
                 var decoded = CashAddr.Decode(address);
 
-                return decoded.Type == CashAddrType.P2PKH
+                return decoded.Type is CashAddrType.P2PKH or CashAddrType.TokenP2PKH
                     ? new BitcoinPubKeyAddress(address, new KeyId(decoded.Hash), this)
                     : new BitcoinScriptAddress(address, new ScriptId(decoded.Hash), this);
             }

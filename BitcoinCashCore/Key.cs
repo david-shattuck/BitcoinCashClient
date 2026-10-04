@@ -44,13 +44,12 @@ namespace BitcoinCash.Core
         /// <param name="type">The kind of address to build</param>
         /// <param name="network">The network the address belongs to</param>
         /// <returns>The address</returns>
-        public BitcoinAddress GetAddress(ScriptPubKeyType type, Network network)
+        public BitcoinAddress GetAddress(ScriptPubKeyType type, Network network) => type switch
         {
-            if (type != ScriptPubKeyType.Legacy)
-                throw new NotSupportedException($"Bitcoin Cash does not support {type} addresses");
-
-            return network.CreateP2PKHAddress(Hash);
-        }
+            ScriptPubKeyType.Legacy => network.CreateP2PKHAddress(Hash),
+            ScriptPubKeyType.TokenAware => network.CreateTokenP2PKHAddress(Hash),
+            _ => throw new NotSupportedException($"Bitcoin Cash does not support {type} addresses")
+        };
     }
 
     /// <summary>

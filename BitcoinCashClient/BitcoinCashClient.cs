@@ -57,11 +57,13 @@ namespace BitcoinCash
             var rawKey = new Key();
             var secret = rawKey.GetBitcoinSecret(_network);
             var address = secret.GetAddress(ScriptPubKeyType.Legacy);
+            var tokenAddress = secret.GetAddress(ScriptPubKeyType.TokenAware);
 
             return new Wallet
             {
                 PrivateKey = secret.ToString(),
                 PublicAddress = address.ToString(),
+                TokenAddress = tokenAddress.ToString(),
                 utxos = [],
                 Value = 0,
                 ValueCurrency = _defaultCurrency
@@ -88,11 +90,13 @@ namespace BitcoinCash
             {
                 var secret = new BitcoinSecret(key, _network);
                 var address = secret.GetAddress(ScriptPubKeyType.Legacy).ToString();
+                var tokenAddress = secret.GetAddress(ScriptPubKeyType.TokenAware).ToString();
 
                 wallets.Add(new Wallet
                 {
                     PrivateKey = key,
-                    PublicAddress = address
+                    PublicAddress = address,
+                    TokenAddress = tokenAddress
                 });
             }
 
@@ -111,11 +115,21 @@ namespace BitcoinCash
         /// </summary>
         /// <param name="addresses">A list of valid BCH public addresses</param>
         /// <returns>A list of read-only wallets, including their balances, values, and utxos</returns>
+        /// <exception cref="FormatException">One of the addresses is not a valid BCH address</exception>
         public async Task<List<Wallet>> GetWalletsByAddresses(List<string> addresses)
         {
-            var wallets = addresses.Select(a => new Wallet
+            var wallets = addresses.Select(a =>
             {
-                PublicAddress = GetCashAddr(a)
+                var address = GetCashAddr(a);
+
+                if (address == string.Empty)
+                    throw new FormatException($"Invalid BCH address: {a}");
+
+                return new Wallet
+                {
+                    PublicAddress = address,
+                    TokenAddress = _network.GetTokenAddress(address).ToString()
+                };
             }).ToList();
 
             return await FillWalletInfo(wallets);
@@ -156,19 +170,27 @@ namespace BitcoinCash
         }
 
         /// <summary>
-        /// Convert a BCH address in any valid format into CashAddr
+        /// Convert a BCH address in any valid format into CashAddr. Token-aware addresses
+        /// are converted to their standard form
         /// </summary>
-        /// <param name="address">Any legacy or modern BCH address</param>
-        /// <returns>A CashAddr format BCH address or an empty string if input was invalid</returns>
+        /// <param name="address">Any legacy, modern or token-aware BCH address</param>
+        /// <returns>A standard CashAddr format BCH address or an empty string if input was invalid</returns>
         public string GetCashAddr(string address)
         {
-            if (address.StartsWith("1") || address.StartsWith("3"))
+            if (address.StartsWith('1') || address.StartsWith('3'))
                 address = address.ToCashAddress();
 
             if (!address.StartsWith("bitcoincash:"))
                 address = string.Concat("bitcoincash:", address);
 
-            return IsAddressValid(address) ? address : string.Empty;
+            try
+            {
+                return _network.GetStandardAddress(address).ToString();
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -222,6 +244,7 @@ namespace BitcoinCash
                     return w;
 
                 filledWallet.PrivateKey = w.PrivateKey;
+                filledWallet.TokenAddress = w.TokenAddress;
 
                 return filledWallet;
             })];

@@ -85,6 +85,7 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 - .NET 10 and C# 14
 - API Secrets
 - Remove NBitcoin dependency
+- CashTokens addresses
 
 ### 3.0
 
