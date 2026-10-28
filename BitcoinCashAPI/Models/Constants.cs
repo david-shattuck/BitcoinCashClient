@@ -10,6 +10,7 @@ namespace BitcoinCash.API.Models
         public const string NextPaymentCheck = "NextPaymentCheck";
         public const string InvalidSecrets = "InvalidSecrets";
         public const string RecentAttempts = "RecentKeyCreationAttempts";
+        public const string TokenBcmr = "TokenBcmr";
     }
 
     public class BchTransactionTypes

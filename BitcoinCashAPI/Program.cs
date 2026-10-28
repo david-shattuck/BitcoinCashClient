@@ -28,6 +28,7 @@ builder.Services.AddTransient<IBchTransactionRepository, BchTransactionRepositor
 builder.Services.AddTransient<IBitcoinClient, BitcoinClient>();
 builder.Services.AddTransient<ICoinGeckoClient, CoinGeckoClient>();
 builder.Services.AddTransient<IBlockChairClient, BlockChairClient>();
+builder.Services.AddTransient<IRiftenClient, RiftenClient>();
 
 // controllers
 builder.Services.AddControllers();
