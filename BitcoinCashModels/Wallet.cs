@@ -27,9 +27,9 @@ namespace BitcoinCash.Models
         public string? TokenAddress { get; set; }
 
         /// <summary>
-        /// The number of satoshis held in this wallet
+        /// The number of satoshis held in this wallet, excluding those in CashToken utxos
         /// </summary>
-        public long? Balance => utxos?.Sum(u => u.value);
+        public long? Balance => _bchUtxos?.Sum(u => u.value);
 
         /// <summary>
         /// The current market value of the balance of this wallet
@@ -80,13 +80,10 @@ namespace BitcoinCash.Models
         public async Task SendAll(string sendTo, bool donateToDev = true)
         {
             _sendAll = true;
+            _sends = [new() { To = sendTo }];
+            _donateToDev = donateToDev;
 
-            var sends = new List<Send>
-            {
-                new() { To = sendTo }
-            };
-
-            await SendToMany(sends, donateToDev);
+            await BaseSend();
         }
 
         /// <summary>
@@ -96,6 +93,7 @@ namespace BitcoinCash.Models
         /// <param name="donateToDev">Set to true to donate 0.1% of send amount to the developer of this library</param>
         public async Task SendToMany(List<Send> sends, bool donateToDev = true)
         {
+            _sendAll = false;
             _sends = sends;
             _donateToDev = donateToDev;
 
@@ -125,9 +123,10 @@ namespace BitcoinCash.Models
         private long _sendSats;
         private long _devDonation;
         private bool _donateToDev;
-        private bool _sendAll = false;
-        private bool _makeChange = false;
+        private bool _sendAll;
+        private uint? _changeIndex;
         private List<utxo>? _utxos;
+        private List<utxo>? _bchUtxos => utxos?.Where(u => u.token_data == null).ToList();
         private BitcoinSecret? _secret;
         private BitcoinAddress? _address;
         private List<Send>? _sends;
@@ -162,7 +161,7 @@ namespace BitcoinCash.Models
         {
             if (_sendAll)
             {
-                _sendSats = utxos!.Sum(u => u.value);
+                _sendSats = _bchUtxos!.Sum(u => u.value);
                 return;
             }
 
@@ -197,7 +196,7 @@ namespace BitcoinCash.Models
         {
             if (_sendAll)
             {
-                _utxos = utxos;
+                _utxos = _bchUtxos;
                 return;
             }
 
@@ -208,7 +207,7 @@ namespace BitcoinCash.Models
             if (_donateToDev)
                 totalSend += _baseFee;
 
-            foreach (var utxo in utxos!.OrderBy(u => u.block_id))
+            foreach (var utxo in _bchUtxos!.OrderBy(u => u.height <= 0).ThenBy(u => Math.Abs(u.height)))
             {
                 if (_utxos.Sum(u => u.value) >= totalSend)
                     break;
@@ -239,7 +238,7 @@ namespace BitcoinCash.Models
         {
             foreach (var utxo in _utxos!)
             {
-                var outPointToSpend = OutPoint.Parse($"{utxo.transaction_hash}:{utxo.index}");
+                var outPointToSpend = OutPoint.Parse($"{utxo.tx_hash}:{utxo.tx_pos}");
                 _transaction!.Inputs.Add(new TxIn()
                 {
                     PrevOut = outPointToSpend,
@@ -251,6 +250,8 @@ namespace BitcoinCash.Models
         private async Task Outputs()
         {
             var devAddress = BitcoinAddress.Create(Constants.DevAddress, _network);
+
+            _changeIndex = null;
 
             var utxoTotal = _utxos!.Sum(u => u.value);
 
@@ -270,8 +271,8 @@ namespace BitcoinCash.Models
 
             if (changeMoney.Satoshi > _baseFee)
             {
+                _changeIndex = (uint)_transaction!.Outputs.Count;
                 _transaction!.Outputs.Add(changeMoney, _address!.ScriptPubKey);
-                _makeChange = true;
             }                
 
             if (_donateToDev)
@@ -284,9 +285,9 @@ namespace BitcoinCash.Models
 
             foreach (var utxo in _utxos!)
             {
-                var txInId = uint256.Parse(utxo.transaction_hash!);
+                var txInId = uint256.Parse(utxo.tx_hash!);
                 var txAmount = new Money(utxo.value, MoneyUnit.Satoshi);
-                var inCoin = new Coin(txInId, utxo.index, txAmount, _address!.ScriptPubKey);
+                var inCoin = new Coin(txInId, utxo.tx_pos, txAmount, _address!.ScriptPubKey);
                 coins.Add(inCoin);
             }
 
@@ -319,7 +320,7 @@ namespace BitcoinCash.Models
 
         private void VerifyUtxos()
         {
-            if (utxos == null || utxos.Count == 0)
+            if (_bchUtxos == null || _bchUtxos.Count == 0)
                 throw new Exception("There are no utxos to spend");
         }
 
@@ -386,7 +387,7 @@ namespace BitcoinCash.Models
 
             if (_sendAll)
             {
-                utxos = [];
+                utxos!.RemoveAll(u => u.token_data == null);
                 Value = 0;
                 return;
             }
@@ -394,20 +395,20 @@ namespace BitcoinCash.Models
             var bchValue = _bchValue;
 
             foreach (var utxo in _utxos!)
-                utxos!.RemoveAll(u => u.transaction_hash == utxo.transaction_hash && u.index == utxo.index);
+                utxos!.RemoveAll(u => u.tx_hash == utxo.tx_hash && u.tx_pos == utxo.tx_pos);
 
-            if (_makeChange)
+            if (_changeIndex != null)
             {
                 utxos!.Add(new utxo
                 {
-                    address = _address!.ToString()[12..],
-                    block_id = 10000000,
-                    transaction_hash = txHash,
-                    index = 1,
+                    address = _address!.ToString(),
+                    height = _utxos!.Any(u => u.height <= 0) ? -1 : 0,
+                    tx_hash = txHash,
+                    tx_pos = _changeIndex.Value,
                     value = _utxos!.Sum(u => u.value) - _sendSats - _devDonation - _totalFee
                 });
 
-                _makeChange = false;
+                _changeIndex = null;
             }
 
             Value = Balance * bchValue / Constants.SatoshiMultiplier;

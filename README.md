@@ -80,6 +80,11 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
+### 4.0
+
+- Fetch utxos from Fulcrum
+- Breaking: utxo fields renamed
+
 ### 3.1
 
 - .NET 10 and C# 14

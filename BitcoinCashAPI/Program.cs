@@ -30,6 +30,11 @@ builder.Services.AddTransient<ICoinGeckoClient, CoinGeckoClient>();
 builder.Services.AddTransient<IBlockChairClient, BlockChairClient>();
 builder.Services.AddTransient<IRiftenClient, RiftenClient>();
 
+// single shared Fulcrum connection, opened at startup
+builder.Services.AddSingleton<FulcrumClient>();
+builder.Services.AddSingleton<IFulcrumClient>(sp => sp.GetRequiredService<FulcrumClient>());
+builder.Services.AddHostedService(sp => sp.GetRequiredService<FulcrumClient>());
+
 // controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

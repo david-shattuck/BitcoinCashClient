@@ -1,6 +1,4 @@
 ﻿using BitcoinCash.API.Clients.Interfaces;
-using BitcoinCash.Models;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BitcoinCash.API.Clients
@@ -17,34 +15,6 @@ namespace BitcoinCash.API.Clients
         {
             _configuration = configuration;
             _key = _configuration["BlockchairAPIKey"] ?? "";
-        }
-
-        public async Task<List<utxo>?> GetUtxos(List<string> addresses)
-        {
-            using var client = new HttpClient();
-            addresses = addresses.Select(a => a[(a.IndexOf(':') + 1)..]).ToList();
-            var addrs = string.Join(",", addresses);
-
-            try
-            {
-                var response = await client.GetAsync($"{_baseUrl}/dashboards/addresses/{addrs}?key={_key}");
-
-                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-                    return [];
-
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                var jo = JObject.Parse(await response.Content.ReadAsStringAsync());
-
-                var utxos = jo?["data"]?["utxo"]?.ToString();
-
-                return JsonConvert.DeserializeObject<List<utxo>>(utxos!);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
         }
 
         public async Task<List<string>?> GetValidTxHashes(List<string> hashes)

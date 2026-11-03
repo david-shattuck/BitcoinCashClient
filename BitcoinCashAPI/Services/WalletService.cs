@@ -4,16 +4,17 @@ using BitcoinCash.Models;
 
 namespace BitcoinCash.API.Services
 {
-    public class WalletService(ICoinGeckoClient coinGeckoClient, IBlockChairClient blockChairClient) : IWalletService
+    public class WalletService(ICoinGeckoClient coinGeckoClient, IBlockChairClient blockChairClient, IFulcrumClient fulcrumClient) : IWalletService
     {
         private readonly IBlockChairClient _blockChairClient = blockChairClient;
         private readonly ICoinGeckoClient _coinGeckoClient = coinGeckoClient;
+        private readonly IFulcrumClient _fulcrumClient = fulcrumClient;
 
         public async Task<List<Wallet>?> GetWalletInfo(List<string> addresses, string currency)
         {
             var wallets = addresses.Select(a => new Wallet { PublicAddress = a }).ToList();
 
-            var utxos = await _blockChairClient.GetUtxos(addresses);
+            var utxos = await _fulcrumClient.GetUtxos(addresses);
 
             if (utxos == null)
                 return null;
@@ -22,7 +23,7 @@ namespace BitcoinCash.API.Services
 
             wallets.ForEach(w =>
             {
-                w.utxos = utxos.Where(u => u.cashAddr == w.PublicAddress).ToList();
+                w.utxos = utxos.Where(u => u.address == w.PublicAddress).ToList();
                 w.Value = bchValue == 0 ? null : (decimal)w.Balance! / Constants.SatoshiMultiplier * bchValue;
                 w.ValueCurrency = currency;
             });

@@ -48,7 +48,9 @@ namespace BitcoinCash.API.Services
             {
                 var key = keys.First(k => k.Address == wallet.PublicAddress);
 
-                var utxoTxIds = wallet.utxos?.Select(u => u.transaction_hash).ToList();
+                var bchUtxos = wallet.utxos?.Where(u => u.token_data == null).ToList();
+
+                var utxoTxIds = bchUtxos?.Select(u => u.tx_hash).ToList();
 
                 if (utxoTxIds == null || utxoTxIds.Count == 0)
                     continue;
@@ -61,9 +63,9 @@ namespace BitcoinCash.API.Services
                 if (!anyNewTxs)
                     continue;
 
-                foreach (var utxo in wallet.utxos!)
+                foreach (var utxo in bchUtxos!)
                 {
-                    var hashTxs = bchTxs.Where(bt => bt.TxId == utxo.transaction_hash).ToList();
+                    var hashTxs = bchTxs.Where(bt => bt.TxId == utxo.tx_hash).ToList();
 
                     if (hashTxs.Count == 0)
                     {
@@ -75,7 +77,7 @@ namespace BitcoinCash.API.Services
                             FromID = null,
                             ToType = BchTxFromToTypes.Key,
                             ToID = key.ID,
-                            TxId = utxo.transaction_hash!,
+                            TxId = utxo.tx_hash!,
                             BchAmount = (decimal)utxo.value / Constants.SatoshiMultiplier,
                             BchPrice = bchPrice,
                             Status = BchTransactionStatus.Confirmed
