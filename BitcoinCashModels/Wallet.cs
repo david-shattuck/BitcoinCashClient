@@ -47,6 +47,11 @@ namespace BitcoinCash.Models
         public List<utxo>? utxos { get; set; }
 
         /// <summary>
+        /// The fungible CashTokens held in this wallet, one entry per token category
+        /// </summary>
+        public List<FungibleToken>? FungibleTokens { get; set; }
+
+        /// <summary>
         /// The hash of the most recent transaction broadcast by this wallet
         /// </summary>
         public string? LastTxId { get; private set; }

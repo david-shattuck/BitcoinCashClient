@@ -80,6 +80,10 @@ For a detailed explanation of the code, please see [this tutorial](https://read.
 
 ## Version History
 
+### 4.1
+
+- Get fungible token balances
+
 ### 4.0
 
 - Fetch utxos from Fulcrum
