@@ -18,7 +18,6 @@ namespace BitcoinCash.API.Clients
         private static readonly string[] HostNames =
         [
             "bch.imaginary.cash",
-            "electroncash.de",
             "bch.loping.net",
             "bch.soul-dev.com",
             "blackie.c3-soft.com",
@@ -27,11 +26,13 @@ namespace BitcoinCash.API.Clients
 
         private static readonly TimeSpan ConnectTimeout = TimeSpan.FromSeconds(10);
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(15);
-
+        private static readonly TimeSpan PingInterval = TimeSpan.FromSeconds(60);
+        private const int MaxInFlightRequests = 5;
         private readonly ILogger<FulcrumClient> _logger = logger;
 
         private readonly SemaphoreSlim _connectLock = new(1, 1);
         private readonly SemaphoreSlim _writeLock = new(1, 1);
+        private readonly SemaphoreSlim _requestLock = new(MaxInFlightRequests, MaxInFlightRequests);
         private readonly ConcurrentDictionary<int, TaskCompletionSource<JObject>> _pending = new();
 
         private TcpClient? _tcpClient;
@@ -109,6 +110,7 @@ namespace BitcoinCash.API.Clients
             Disconnect();
             _connectLock.Dispose();
             _writeLock.Dispose();
+            _requestLock.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -159,27 +161,63 @@ namespace BitcoinCash.API.Clients
 
             var stream = new SslStream(_tcpClient.GetStream());
             await stream.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = hostName }, timeoutCts.Token);
-            _stream = stream;
 
             _listenCts = new CancellationTokenSource();
-            _ = Task.Run(() => Listen(stream, _listenCts.Token));
+            var listenToken = _listenCts.Token;
+            _ = Task.Run(() => Listen(stream, listenToken));
 
-            var handshake = await Send("server.version", [ClientName, ProtocolVersions]);
+            var handshake = await Send(stream, "server.version", [ClientName, ProtocolVersions]);
 
             if (handshake["error"] is JObject error)
                 throw new InvalidOperationException($"Handshake rejected: {error.ToString(Formatting.None)}");
+
+            _stream = stream;
+
+            _ = Task.Run(() => KeepAlive(stream, listenToken));
+        }
+
+        private async Task KeepAlive(SslStream stream, CancellationToken cancellationToken)
+        {
+            try
+            {
+                using var timer = new PeriodicTimer(PingInterval);
+
+                while (await timer.WaitForNextTickAsync(cancellationToken) && ReferenceEquals(stream, _stream))
+                    await Send(stream, "server.ping", []);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                _logger.LogInformation("Fulcrum keepalive ping failed: {message}", ex.Message);
+            }
         }
 
         private async Task<JObject?> Request(string method, object[] args)
         {
-            await EnsureConnected();
-            return await Send(method, args);
+            await _requestLock.WaitAsync();
+
+            try
+            {
+                try
+                {
+                    await EnsureConnected();
+                    return await Send(_stream ?? throw new IOException("Not connected to Fulcrum"), method, args);
+                }
+                catch (Exception ex) when (ex is IOException or ObjectDisposedException)
+                {
+                    _logger.LogInformation("Retrying Fulcrum {method} after connection loss: {message}", method, ex.Message);
+                    await EnsureConnected();
+                    return await Send(_stream ?? throw new IOException("Not connected to Fulcrum"), method, args);
+                }
+            }
+            finally
+            {
+                _requestLock.Release();
+            }
         }
 
-        private async Task<JObject> Send(string method, object[] args)
+        private async Task<JObject> Send(SslStream stream, string method, object[] args)
         {
-            var stream = _stream ?? throw new InvalidOperationException("Not connected to Fulcrum");
-
             var id = Interlocked.Increment(ref _requestId);
             var tcs = new TaskCompletionSource<JObject>(TaskCreationOptions.RunContinuationsAsynchronously);
             _pending[id] = tcs;
